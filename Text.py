@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import codecs
+import textwrap
+from sentence_splitter import split_sentences
+from StringIO import StringIO
 
 class Text(object):
     """A class that makes text available in various formats.  It is
@@ -21,8 +24,8 @@ class Text(object):
         self.name = name
 
     @classmethod
-    def from_file(cls, path, *args, **kwargs):
-        with codecs.open(path, encoding=kwargs.get('coding', 'utf-8')) as f:
+    def from_file(cls, file_path, *args, **kwargs):
+        with codecs.open(file_path, encoding=kwargs.get('coding', 'utf-8')) as f:
             return Text(f, *args, **kwargs)
 
     def as_string(self):
@@ -36,7 +39,7 @@ class Text(object):
     def as_sentences(self, paragraph_separator=None):
         def gen():
             for p in self.paragraphs:
-                for sent in nlp.sent_tokenize(self.lang, p):
+                for sent in split_sentences(p, self.lang):
                     yield sent
                 if paragraph_separator:
                     yield paragraph_separator
@@ -46,10 +49,17 @@ class Text(object):
         return self.as_sentences(paragraph_separator=u'¶')
 
     def as_sentences_nested(self):
-        return [ list(nlp.sent_tokenize(self.lang, p))
+        return [ split_sentences(p, self.lang)
                  for p in self.paragraphs ]
 
     # maybe also as words?
+
+    def dump(self, file_path):
+        """Write text to file, as UTF-8 plain text file, wrapped to 80
+        chars per line, and "\n\n" separating the paragraphs.
+        """
+        with open(file_path, 'w') as f:
+            _write_paragraphs(self.paragraphs, f)
 
 def _read_paragraphs(stream, coding='utf-8'):
     '''A generator to read a stream by paragraphs (separated by "\n\n").
