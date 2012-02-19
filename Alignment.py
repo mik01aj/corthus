@@ -1,4 +1,6 @@
 
+import csv
+
 class Alignment:
 
     def __init__(self, data):
@@ -9,8 +11,6 @@ class Alignment:
         assert isinstance(data[0], tuple)
         assert len(data[0]) == 3
         self.data = data
-        for row in data:
-            print '%d\t%d\t%.3f' % row
 
     @classmethod
     def from_file(cls, file_path, *args, **kwargs):
@@ -46,11 +46,15 @@ class Alignment:
                 _i, _j, _c = i, j, c
         return tuple(gen())
 
-    def as_bisentences(self, seq1=None, seq2=None, with_costs=False):
+    def as_pairs(self, seq1=None, seq2=None, with_costs=False):
+        """Iterate only over 1-1 matches. (This means bisentences in a
+        sentence-level alignment)
+        """
         def gen():
             _i, _j, _c = 0, 0, 1
             for i, j, c in self.data:
                 if (i, j) == (_i + 1, _j + 1):
+                    print i, j, len(seq1), len(seq2) # XXX
                     s1 = seq1[_i] if seq1 else _i
                     s2 = seq2[_j] if seq2 else _j
                     if with_costs:
