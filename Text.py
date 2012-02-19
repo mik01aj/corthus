@@ -28,6 +28,13 @@ class Text(object):
         with codecs.open(file_path, encoding=kwargs.get('coding', 'utf-8')) as f:
             return Text(f, *args, **kwargs)
 
+    def dump(self, file_path):
+        """Write text to file, as UTF-8 plain text file, wrapped to 80
+        chars per line, and "\n\n" separating the paragraphs.
+        """
+        with open(file_path, 'w') as f:
+            _write_paragraphs(self.paragraphs, f)
+
     def as_string(self):
         stream = StringIO()
         _write_paragraphs(self.paragraphs, stream)
@@ -53,13 +60,6 @@ class Text(object):
                  for p in self.paragraphs ]
 
     # maybe also as words?
-
-    def dump(self, file_path):
-        """Write text to file, as UTF-8 plain text file, wrapped to 80
-        chars per line, and "\n\n" separating the paragraphs.
-        """
-        with open(file_path, 'w') as f:
-            _write_paragraphs(self.paragraphs, f)
 
 def _read_paragraphs(stream, coding='utf-8'):
     '''A generator to read a stream by paragraphs (separated by "\n\n").

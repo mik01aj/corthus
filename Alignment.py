@@ -12,20 +12,17 @@ class Alignment:
         for row in data:
             print '%d\t%d\t%.3f' % row
 
-    def evaluate(self, golden):
-        intersection = set((i, j) for (i, j, c) in self.data) & \
-                       set((i, j) for (i, j, c) in golden)
-        precision = len(intersection) / len(self.data)
-        recall = len(intersection) / len(golden)
-        return "Precision: %.2f%%, Recall: %.2f%%" % (precision*100, recall*100)
-        #return (precision, recall)
-
     @classmethod
     def from_file(cls, file_path, *args, **kwargs):
         with open(file_path) as f:
             return Alignment([(int(i), int(j), float(k))
                               for (i, j, k) in csv.reader(f)],
                              *args, **kwargs)
+
+    def dump(self, file_path):
+        with open(file_path, 'w') as f:
+            writer = csv.writer(f)
+            writer.writerows(self.data)
 
     def as_ladder(self, with_costs=False):
         def gen():
@@ -63,7 +60,11 @@ class Alignment:
                 _i, _j, _c = i, j, c
         return tuple(gen())
 
-    def dump(self, file_path):
-        with open(file_path, 'w') as f:
-            writer = csv.writer(f)
-            writer.writerows(self.data)
+    def evaluate(self, golden):
+        intersection = set((i, j) for (i, j, c) in self.data) & \
+                       set((i, j) for (i, j, c) in golden)
+        precision = len(intersection) / len(self.data)
+        recall = len(intersection) / len(golden)
+        return "Precision: %.2f%%, Recall: %.2f%%" % (precision*100, recall*100)
+        #return (precision, recall)
+
