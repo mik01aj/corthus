@@ -14,12 +14,16 @@ class Text(object):
 
     def __init__(self, data, lang=None, coding='utf-8', name=None):
         """Create a string from given data.
-        data: a string or stream (e.g. an open file)
+        data: a string, stream (e.g. an open file), or a list of strings (paragraphs)
         """
         assert lang==None or (isinstance(lang, (unicode, str)) and len(lang)==2)
         if isinstance(data, (str, unicode)):
-            data = StringIO(data)
-        self.paragraphs = tuple(_read_paragraphs(data, coding))
+            self.paragraphs = tuple(_read_paragraphs( StringIO(data), coding))
+        elif isinstance(data, (list, tuple)):
+            self.paragraphs = tuple(data)
+        else: # stream
+            self.paragraphs = tuple(_read_paragraphs(data, coding))
+
         self.lang = lang
         self.name = name
 
