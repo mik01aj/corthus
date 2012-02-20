@@ -24,6 +24,7 @@ def export_for_giza(file1, file2, alignment_file, output1, output2):
             f.write(s.encode('utf-8') + '\n')
 
 if __name__ == '__main__':
+
     if sys.argv[1] == 'giza':
         (file1, file2, alignment_file, output1, output2) = sys.argv[2:]
         export_for_giza(file1, file2, alignment_file, output1, output2)

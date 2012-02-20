@@ -47,14 +47,13 @@ class Alignment:
         return tuple(gen())
 
     def as_pairs(self, seq1=None, seq2=None, with_costs=False):
-        """Iterate only over 1-1 matches. (This means bisentences in a
-        sentence-level alignment)
+        """Iterate only over 1-1 matches. This means bisentences in a
+        sentence-level alignment.
         """
         def gen():
             _i, _j, _c = 0, 0, 1
             for i, j, c in self.data:
                 if (i, j) == (_i + 1, _j + 1):
-                    print i, j, len(seq1), len(seq2) # XXX
                     s1 = seq1[_i] if seq1 else _i
                     s2 = seq2[_j] if seq2 else _j
                     if with_costs:
