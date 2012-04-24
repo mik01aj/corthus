@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Created on Nov 16, 2011
-
 @author: m01
-'''
+
+Sentence splitting for all languages (pl, cu, el). To use it on the
+command-line, see text_export.py (export for hunalign).
+"""
 
 import re
 import nltk
@@ -22,10 +24,10 @@ def split_sentences(text, lang):
         return nltk.sent_tokenize(text)
 
 def split_sentences_cu(text):
-    '''Returns an iterator over text's sentences. It should be run on one
+    """Returns an iterator over text's sentences. It should be run on one
     paragraph - not on the whole text - because it treats first words
     specially.
-    '''
+    """
     if isinstance(text, str):
         text = unicode(text, 'utf-8')
     assert isinstance(text, unicode), type(text)

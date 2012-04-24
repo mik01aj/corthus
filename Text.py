@@ -8,7 +8,7 @@ from StringIO import StringIO
 class Text(object):
     """A class that makes text available in various formats.  It is
     pretty lightweight, so it can be used just to read paragraphs of
-    test from a file. All text data is stored internally as unicode
+    text from a file. All text data is stored internally as unicode
     strings.
     """
 

@@ -8,20 +8,20 @@ class Alignment:
         data: list of 3-tuples: (index1, index2, cost)
         """
         data = tuple(data)
-        assert isinstance(data[0], tuple)
-        assert len(data[0]) == 3
+        assert not data or isinstance(data[0], tuple)
+        assert not data or len(data[0]) == 3
         self.data = data
 
     @classmethod
     def from_file(cls, file_path, *args, **kwargs):
         with open(file_path) as f:
             return Alignment([(int(i), int(j), float(k))
-                              for (i, j, k) in csv.reader(f)],
+                              for (i, j, k) in csv.reader(f, dialect='excel-tab')],
                              *args, **kwargs)
 
     def dump(self, file_path):
         with open(file_path, 'w') as f:
-            writer = csv.writer(f)
+            writer = csv.writer(f, dialect='excel-tab')
             writer.writerows(self.data)
 
     def as_ladder(self, with_costs=False):

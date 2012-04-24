@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+"""
+A helper script for Makefile.
+"""
+
 import sys
 import os
 import re
@@ -13,7 +17,7 @@ if __name__ == '__main__':
 
     while files:
         filename = files.pop()
-        m = re.match('([a-z0-9._-]+)\.([a-z]{2}).txt', filename)
+        m = re.match('(.+)\.([a-z]{2}).txt', filename)
         if m:
             basename = texts_dir + m.group(1)
             lang = m.group(2)
