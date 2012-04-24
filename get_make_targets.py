@@ -11,7 +11,11 @@ import re
 if __name__ == '__main__':
     texts_dir = os.path.dirname(__file__) + '/texts/'
 
-    files = set(os.listdir(texts_dir))
+    files = set()
+    
+    for d, ds, fs in os.walk(texts_dir):
+        for f in fs:
+            files.add(os.path.join(d, f))
 
     grouped = {}
 
@@ -19,7 +23,7 @@ if __name__ == '__main__':
         filename = files.pop()
         m = re.match('(.+)\.([a-z]{2}).txt', filename)
         if m:
-            basename = texts_dir + m.group(1)
+            basename = m.group(1)
             lang = m.group(2)
             grouped[basename] = grouped.get(basename, []) + [lang]
 
