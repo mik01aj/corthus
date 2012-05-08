@@ -8,3 +8,6 @@ them.
 """
 
 #TODO imports
+
+from Text import Text
+from Alignment import Alignment

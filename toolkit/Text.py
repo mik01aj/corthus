@@ -18,10 +18,14 @@ class Text(object):
         """
         assert lang==None or (isinstance(lang, (unicode, str)) and len(lang)==2)
         if isinstance(data, (str, unicode)):
-            self.paragraphs = tuple(_read_paragraphs( StringIO(data), coding))
+            # constructing a Text from a string
+            self.paragraphs = tuple(_read_paragraphs(StringIO(data), coding))
         elif isinstance(data, (list, tuple)):
+            # constructing a Text from a list of paragraphs
+            assert all(isinstance(p, (str, unicode)) for p in data)
             self.paragraphs = tuple(data)
-        else: # stream
+        else:
+            # constructing a Text from a stream (e.g. an open file)
             self.paragraphs = tuple(_read_paragraphs(data, coding))
 
         self.lang = lang
