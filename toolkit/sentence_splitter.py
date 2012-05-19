@@ -23,6 +23,7 @@ def split_sentences(text, lang):
     else:
         return nltk.sent_tokenize(text)
 
+
 def split_sentences_cu(text):
     """Returns an iterator over text's sentences. It should be run on one
     paragraph - not on the whole text - because it treats first words
@@ -32,33 +33,31 @@ def split_sentences_cu(text):
         text = unicode(text, 'utf-8')
     assert isinstance(text, unicode), type(text)
 
-    sent = []
-    words = text.split()
-    while True:
-        change = False
-        for i in range(3):
-            if len(words) > i and words[i].endswith(':'):
-                yield u' '.join(words[:i+1])
-                words = words[i+1:]
-                change = True
-                break
-        if not change:
-            break
-    for w in words:
-        sent.append(w)
-        if len(sent) >= 3 and re.match(ur"\S+, гла'съ \S+[:,.]$",
-                                       ' '.join(sent[-3:])):
-            yield ' '.join(sent[:-2])
-            sent = sent[-2:]
-        if any([w.endswith(u'.') and not w.endswith(u"с."),
-                w.endswith(u'!'),
-                w.endswith(u';'),
-                re.match(ur"и= ны'нjь[:,]", u' '.join(sent[-2:])),
-                ' '.join(sent[-3:]) == ur"на Гд\си воззва'хъ,"]):
-            yield ' '.join(sent)
-            sent = []
-    if sent:
-        yield ' '.join(sent)
+    split_char = unicode('♦', 'utf-8')
+
+    # 1: space or beginning
+    # 2: common abbreviations (we don't match them)
+    # 3: word with dot (note: \w contains also underscore)
+    # *: the dot
+    # 4: optional closing brackets
+    # 5: beginning of the next word (after space)
+    #               (   1____    2_______ 3____________ *4______) (5__)
+    text = re.sub(r"((?:\s|\A)(?!с\.|ст\.)[\w'=`~\\^-]+\.[\]\)]?) (\w+)".decode('utf-8'),
+                  r'\1' + split_char + r'\2',
+                  text, flags=re.UNICODE)
+
+    def split_if_uppercase(m):
+        first_letter = m.group(2).replace("_", "")[0]
+        if not first_letter or first_letter.isupper():
+            return m.group(1) + split_char + m.group(2)
+        else:
+            return m.group(0) # no change
+    text = re.sub(r"([\w'=`~\\^-]+[:;!]) (\w+)",
+                  split_if_uppercase,
+                  text, flags=re.UNICODE)
+
+    return text.split(split_char)
+
 
 def split_sentences_el(text):
     if isinstance(text, str):
