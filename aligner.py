@@ -116,8 +116,9 @@ def align(seq1, seq2, plot_filename=None):
     for i in xrange(0, len(seq1)+1):
         for j in xrange(0, len(seq2)+1):
 
-            if abs(i/len(seq1) - j/len(seq2)) > 0.3:
-                continue # skipping some parts of the martix
+            # skipping some parts of the martix
+#            if abs(i/len(seq1) - j/len(seq2)) > 0.3:
+#                continue 
 
             # Iterating over possible matches.
             # Fragments tested end in i and j, respectively.
@@ -164,7 +165,7 @@ def align(seq1, seq2, plot_filename=None):
 
     # total cost: - log(probability of given alignment); not normalized
     # the smaller the better
-    print "Total cost: " + cost[len(seq1)][len(seq2)]
+    print "Total cost: " + str(cost[len(seq1)][len(seq2)])
     return Alignment(reversed(path))
 
 
