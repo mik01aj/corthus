@@ -38,11 +38,11 @@ def split_sentences_cu(text):
     # 1: space or beginning
     # 2: common abbreviations (we don't match them)
     # 3: word with dot (note: \w contains also underscore)
-    # *: the dot
-    # 4: optional closing brackets
-    # 5: beginning of the next word (after space)
-    #               (   1____    2_______ 3____________ *4______) (5__)
-    text = re.sub(r"((?:\s|\A)(?!с\.|ст\.)[\w'=`~\\^-]+\.[\]\)]?) (\w+)".decode('utf-8'),
+    # 4: the dot or semicolon
+    # 5: optional closing brackets
+    # 6: beginning of the next word (after space)
+    #               (   1____    2_______ 3____________ 4_ 5______) (6__)
+    text = re.sub(r"((?:\s|\A)(?!с\.|ст\.)[\w'=`~\\^-]+[.;][\]\)]?) (\w+)".decode('utf-8'),
                   r'\1' + split_char + r'\2',
                   text, flags=re.UNICODE)
 
@@ -52,7 +52,7 @@ def split_sentences_cu(text):
             return m.group(1) + split_char + m.group(2)
         else:
             return m.group(0) # no change
-    text = re.sub(r"([\w'=`~\\^-]+[:;!]) (\w+)",
+    text = re.sub(r"([\w'=`~\\^-]+[:!]) (\w+)",
                   split_if_uppercase,
                   text, flags=re.UNICODE)
 
