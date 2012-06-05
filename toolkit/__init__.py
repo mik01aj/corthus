@@ -12,3 +12,4 @@ them.
 from Text import Text
 from Alignment import Alignment
 from sentence_splitter import split_sentences, split_sentences_cu, split_sentences_el
+from PairManager import PairManager
