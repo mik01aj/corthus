@@ -15,10 +15,6 @@ if __name__ == '__main__':
     paragraph_counts = defaultdict(lambda: 0)
 
     filenames = sys.argv[1:]
-    if not filenames:
-        print __doc__
-        sys.exit()
-
     for filename in filenames:
         t = Text.from_file(filename)
         for paragraph in t.as_paragraphs():
