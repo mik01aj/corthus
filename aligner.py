@@ -24,8 +24,8 @@ _sentence_separator = unicode(' ♦ ', 'utf-8')
 pair_manager = PairManager.from_file('data/pairs.pl-cu') #XXX
 
 
-def similarity(fragment1, fragment2):
-    """Estimated probability that fragment1 is translation of fragment2.
+def calculate_cost(fragment1, fragment2):
+    """Estimated -log(probability that fragment1 is translation of fragment2).
     Fragment1 and 2 are lists of sentences."""
 
     #XXX now it doesn't have anything to do with probability, as it gives reults
@@ -34,22 +34,22 @@ def similarity(fragment1, fragment2):
     # paragraph separator with something
     if fragment1 == [_paragraph_separator] or fragment2 == [_paragraph_separator]:
         if fragment1 == fragment2:
-            return 2**2 #XXX
+            return -2
         elif not fragment1 or not fragment2: # ¶ with empty
-            return 2**-2
+            return 2
         else: # ¶ matched with something else
-            return 0 # 2**-inf
+            return float('inf')
 
     # addition/deletion
     elif not fragment1 or not fragment2:
         num_sents = len(fragment1) + len(fragment2)
         assert num_sents > 0
         #XXX assuming avg. 1 sentence in 32 is deleted
-        return 2**(-20 * sqrt(num_sents))
+        return 20 * sqrt(num_sents)
 
     elif pair_manager.has_pair(_sentence_separator.join(fragment1),
                                _sentence_separator.join(fragment2)):
-        return 2**30 #XXX
+        return -30 #XXX
 
     else:
         (r, angle) = polar(complex(sum(len(s) for s in fragment1),
@@ -59,7 +59,7 @@ def similarity(fragment1, fragment2):
         # a letter is around 2.5 bits of entropy
         #FIXME this r should be multiplied by some big factor, so that it
         # would make a true normal distribution with angle**2
-        return 2**(- r*2.5 * angle**2)
+        return r*2.5 * angle**2
 
 
 def plot_flat(fun, rangex, rangey, path=None, filename=None):
@@ -86,11 +86,6 @@ def plot_flat(fun, rangex, rangey, path=None, filename=None):
         plt.show()
 
 
-def calculate_cost(fragment1, fragment2):
-    s = similarity(fragment1, fragment2)
-    return -log(s, 2) if s > 0 else float('inf')
-
-
 def align(seq1, seq2, plot_filename=None):
 
     # cost[i][j] means sum of costs for seq1[0:i] and seq2[0:j]
@@ -114,11 +109,13 @@ def align(seq1, seq2, plot_filename=None):
 
     # i, j: sentence numbers
     for i in xrange(0, len(seq1)+1):
+        print "\ri=%d (%.f%%)" % (i, i*100/(len(seq1)+1)),
+        sys.stdout.flush()
         for j in xrange(0, len(seq2)+1):
 
             # skipping some parts of the martix
 #            if abs(i/len(seq1) - j/len(seq2)) > 0.3:
-#                continue 
+#                continue
 
             # Iterating over possible matches.
             # Fragments tested end in i and j, respectively.
@@ -130,6 +127,9 @@ def align(seq1, seq2, plot_filename=None):
                 _j = j - fl_j
 
                 # if skipping, then skipping as one big jump
+                #FIXME: this doesn't always find the best path,
+                # because sometimes it is not worth it to jump over
+                # just one sentence, so the jump won't start
                 if (fl_i, fl_j) == (1, 0):
                     while prev[_i][_j] and prev[_i][_j][1] == _j:
                         _i = prev[_i][_j][0]
