@@ -1,6 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+"""
+This script reads alignment files and collects all the found pairs. As
+output, it prints all repeated pairs, starting from the most frequent.
+
+Usage: ./alignment_analysis.py file1.pl-cu.hunalign [file2.pl-cu.golden...]
+       (assuming existence of file1.pl.txt, file1.cu.txt, and so on)
+"""
+
 import sys
 from toolkit import Text, Alignment
 import re
@@ -30,7 +38,12 @@ if __name__ == '__main__':
     # translation pair histogram
     translations = defaultdict(lambda: 0)
 
+
     filenames = sys.argv[1:]
+    if not filenames:
+        print __doc__
+        sys.exit()
+
     for f in filenames:
         for s1, s2 in read_all_pairs(f):
             if s1 and s2:
