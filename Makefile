@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 
 all: $(shell ./get_make_targets.py)
 
@@ -12,11 +13,11 @@ HUNALIGN='/home/m01/Dropbox/corthus/poligon/hunalign-1.1/src/hunalign/hunalign'
 	./toolkit/text_export.py hunalign $< el $@
 
 %.pl-cu.hunalign: %.pl.sentences %.cu.sentences
-	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> $@.log
+	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> >(tee "/tmp/$(shell echo $@.log | sed -e 's#/#_#g')" | grep Quality >&2)
 %.cu-el.hunalign: %.cu.sentences %.el.sentences
-	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> $@.log
+	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> >(tee "/tmp/$(shell echo $@.log | sed -e 's#/#_#g')" | grep Quality >&2)
 %.pl-el.hunalign: %.pl.sentences %.el.sentences
-	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> $@.log
+	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> >(tee "/tmp/$(shell echo $@.log | sed -e 's#/#_#g')" | grep Quality >&2)
 
 pairs: data/pairs.pl-cu data/pairs.cu-el data/pairs.pl-el
 data/pairs.pl-cu: alignment_analysis.py
@@ -25,3 +26,4 @@ data/pairs.cu-el: alignment_analysis.py
 	./alignment_analysis.py `find texts/ -name '*.cu-el.hunalign'` > $@
 data/pairs.pl-el: alignment_analysis.py
 	./alignment_analysis.py `find texts/ -name '*.pl-el.hunalign'` > $@
+
