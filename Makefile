@@ -14,10 +14,13 @@ HUNALIGN='/home/m01/Dropbox/corthus/poligon/hunalign-1.1/src/hunalign/hunalign'
 
 %.pl-cu.hunalign: %.pl.sentences %.cu.sentences
 	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> >(tee "/tmp/$(shell echo $@.log | sed -e 's#/#_#g')" | grep Quality >&2)
+	rm translate.txt
 %.cu-el.hunalign: %.cu.sentences %.el.sentences
 	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> >(tee "/tmp/$(shell echo $@.log | sed -e 's#/#_#g')" | grep Quality >&2)
+	rm translate.txt
 %.pl-el.hunalign: %.pl.sentences %.el.sentences
 	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> >(tee "/tmp/$(shell echo $@.log | sed -e 's#/#_#g')" | grep Quality >&2)
+	rm translate.txt
 
 pairs: data/pairs.pl-cu data/pairs.cu-el data/pairs.pl-el
 data/pairs.pl-cu: alignment_analysis.py
