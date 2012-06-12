@@ -3,7 +3,7 @@
 
 """
 This module contains the Alignment class, which is used to handle
-text alignments. You can also run this file it from the command line
+text alignments. You can also run this file from the command line
 to pretty-print an alignment.
 """
 
@@ -24,7 +24,6 @@ class Alignment:
         for i, j, c in data:
             assert _i <= i, (_i, i)
             assert _j <= j, (_j, j)
-#            assert c >= 0, c
             _i, _j = i, j
         self.data = data
 

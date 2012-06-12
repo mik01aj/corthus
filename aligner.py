@@ -28,15 +28,15 @@ def calculate_cost(fragment1, fragment2):
     """Estimated -log(probability that fragment1 is translation of fragment2).
     Fragment1 and 2 are lists of sentences."""
 
-    #XXX now it doesn't have anything to do with probability, as it gives reults
-    # such as 2**30...
+    #XXX now it doesn't have anything to do with probability, as it
+    # gives "probabilities" such as 2**30...
 
     # paragraph separator with something
     if fragment1 == [_paragraph_separator] or fragment2 == [_paragraph_separator]:
         if fragment1 == fragment2:
-            return -2
+            return -1
         elif not fragment1 or not fragment2: # ¶ with empty
-            return 2
+            return 1
         else: # ¶ matched with something else
             return float('inf')
 
@@ -45,11 +45,11 @@ def calculate_cost(fragment1, fragment2):
         num_sents = len(fragment1) + len(fragment2)
         assert num_sents > 0
         #XXX assuming avg. 1 sentence in 32 is deleted
-        return 20 * sqrt(num_sents)
+        return 10 * sqrt(num_sents)
 
     elif pair_manager.has_pair(_sentence_separator.join(fragment1),
                                _sentence_separator.join(fragment2)):
-        return -30 #XXX
+        return -5 * (len(fragment1)+len(fragment2)) #XXX
 
     else:
         (r, angle) = polar(complex(sum(len(s) for s in fragment1),
@@ -64,6 +64,9 @@ def calculate_cost(fragment1, fragment2):
 
 def plot_flat(fun, rangex, rangey, path=None, filename=None):
     import matplotlib.pyplot as plt
+
+    print 'Plotting...',
+    sys.stdout.flush()
 
     fig = plt.figure(figsize=(20, 20)) # in inches, @ 80dpi
     ax = fig.add_subplot(111)
@@ -84,6 +87,7 @@ def plot_flat(fun, rangex, rangey, path=None, filename=None):
         plt.savefig(filename)
     else:
         plt.show()
+    print '\rPlot done.      '
 
 
 def align(seq1, seq2, plot_filename=None):
@@ -147,6 +151,7 @@ def align(seq1, seq2, plot_filename=None):
                     #print _i, i, _j, j
                     cost[i][j] = new_cost
                     prev[i][j] = (_i, _j)
+    print '\rAlingment done'
 
     assert (i, j) == (len(seq1), len(seq2))
     path = [(i, j, 0.1)]
@@ -190,10 +195,4 @@ if __name__ == '__main__':
     a = align(t1, t2, plot_filename='plot.png')
 
     a.pretty_print(t1, t2)
-
-#    t1 = ('aa', 'aaa', 'aaaaa', 'a')
-#    t2 = ('aa', 'aaaaaa', 'aa')
-#    r = align(t1, t2)
-#    print r
-#    print r.quality
 
