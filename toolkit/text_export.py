@@ -7,6 +7,11 @@ from Alignment import Alignment
 """
 Exporting a Text to various formats. This script is also usable from
 the command-line.
+
+Usage:
+    ./text_export.py giza <file1> <lang1> <file2> <lang2> \\
+                          <alignment-file> <output1> <output2>
+    ./text_export.py hunalign <input-file> <lang> <output-file>
 """
 
 def extract_bisents(file1, lang1, file2, lang2, alignment_file):
@@ -36,6 +41,7 @@ def export_for_hunalign(input_file, lang, output_file):
     t = Text.from_file(input_file, lang)
     with open(output_file, 'w') as f:
         for s in t.as_sentences(paragraph_separator='<p>'):
+            #TODO transliterate
             f.write(s.encode('utf-8') + '\n')
 
 if __name__ == '__main__':
@@ -46,4 +52,4 @@ if __name__ == '__main__':
         (input_file, lang, output_file) = sys.argv[2:]
         export_for_hunalign(input_file, lang, output_file)
     else:
-        print '?'
+        print __doc__
