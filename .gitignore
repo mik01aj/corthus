@@ -1,4 +1,6 @@
 *.pyc
 .#*
 *.hunalign
+*.sentences
 *.log
+*.png
