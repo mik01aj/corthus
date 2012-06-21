@@ -40,7 +40,8 @@ if __name__ == '__main__':
 
     # translation pair histogram
     translations = defaultdict(lambda: 0)
-
+    sentence_occurences1 = defaultdict(lambda: 0)
+    sentence_occurences2 = defaultdict(lambda: 0)
 
     filenames = sys.argv[1:]
     if not filenames:
@@ -50,17 +51,24 @@ if __name__ == '__main__':
     for f in filenames:
         for s1, s2 in read_all_pairs(f):
             if s1 and s2:
+                sentence_occurences1[s1] += 1
+                sentence_occurences2[s2] += 1
                 translations[s1, s2] += 1
 
     translations_as_list = [(count, translation)
                           for (translation, count)
                           in translations.iteritems()]
-
     translations_as_list.sort(reverse=True)
 
     for count, (s1, s2) in translations_as_list:
         if count < 2:
             break
+
+        # if these sentences occur paired with each other,
+        # at least every 5th time they occur at all
+        if sentence_occurences1[s1] + sentence_occurences2[s2] > 10 * count:
+            continue
+
         print count
         print s1.encode('utf-8')
         print s2.encode('utf-8')

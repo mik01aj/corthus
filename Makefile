@@ -34,12 +34,13 @@ clean-hunalign:
 	rm -f /tmp/*.hunalign.log
 
 pairs: data/pairs.pl-cu data/pairs.cu-el data/pairs.pl-el
+# To require alignments, add $(shell find texts/ -name '*.??-??.hunalign') as requirement
 # I'm using a wildcard here (instead of get_make_targets) because not all alignments are needed
-data/pairs.pl-cu: alignment_analysis.py $(shell find texts/ -name '*.??-??.hunalign')
+data/pairs.pl-cu: alignment_analysis.py
 	./alignment_analysis.py `find texts/ -name '*.pl-cu.hunalign'` > $@
-data/pairs.cu-el: alignment_analysis.py $(shell find texts/ -name '*.??-??.hunalign')
+data/pairs.cu-el: alignment_analysis.py
 	./alignment_analysis.py `find texts/ -name '*.cu-el.hunalign'` > $@
-data/pairs.pl-el: alignment_analysis.py $(shell find texts/ -name '*.??-??.hunalign')
+data/pairs.pl-el: alignment_analysis.py
 	./alignment_analysis.py `find texts/ -name '*.pl-el.hunalign'` > $@
 
 my: $(shell ./get_make_targets.py 2 .my)
