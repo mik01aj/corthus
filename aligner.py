@@ -4,7 +4,11 @@
 """
 An aligner script.
 
-Usage: ./aligner.py text1 text2
+Usage: ./aligner.py text.lang1.txt       text.lang2.txt       [options]
+       ./aligner.py text.lang1.sentences text.lang2.sentences [options]
+Options are:
+    -text   writes the alignment as pretty-printed text
+    -plot   plots the cost table to plot.png
 """
 
 from __future__ import division
@@ -19,9 +23,10 @@ from toolkit import Alignment, PairManager
 matplotlib.use('Agg')
 
 _paragraph_separator = unicode('¶', 'utf-8')
+#_paragraph_separator = unicode('<p>')
 _sentence_separator = unicode(' ♦ ', 'utf-8')
 
-pair_manager = PairManager.from_file('data/pairs.pl-cu') #XXX
+pair_manager = None #FIXME find some nice way to handle various languages
 
 
 def calculate_cost(fragment1, fragment2):
@@ -31,33 +36,45 @@ def calculate_cost(fragment1, fragment2):
     #XXX now it doesn't have anything to do with probability, as it
     # gives "probabilities" such as 2**30...
 
-    # paragraph separator with something
-    if fragment1 == [_paragraph_separator] or fragment2 == [_paragraph_separator]:
-        if fragment1 == fragment2:
-            return -1
-        elif not fragment1 or not fragment2: # ¶ with empty
+    #TODO write some conditions that should be always true, like:
+    # * cost(s1, s2) + cost(¶, ¶) < cost(s1 + ¶, s2 + ¶)
+    #                               (s+¶ can be even forbidden)
+    # * cost(s1, s2) + cost('', s3) < cost(s1, s2 + s3) if s1 matches s2
+
+    _s = _paragraph_separator
+
+    (len1, len2) = (len(fragment1), len(fragment2))
+
+    # addition/deletion
+    if not fragment1 or not fragment2:
+        assert len1 + len2 > 0
+        #XXX assuming avg. 1 sentence in 32 is deleted
+        real_sents = sum(sent != _s for sent in fragment1 + fragment2)
+        if real_sents == 0:
             return 1
+        return 20 * sqrt(real_sents)
+
+    # if at least on of fragments begins or ends with paragraph separator
+    elif (fragment1[0] == _s or fragment1[-1] == _s or
+          fragment2[0] == _s or fragment2[-1] == _s):
+        if fragment1 == fragment2:
+            return -5
         else: # ¶ matched with something else
             return float('inf')
 
-    # addition/deletion
-    elif not fragment1 or not fragment2:
-        num_sents = len(fragment1) + len(fragment2)
-        assert num_sents > 0
-        #XXX assuming avg. 1 sentence in 32 is deleted
-        return 10 * sqrt(num_sents)
+    # looking up pair
+    elif pair_manager and pair_manager.has_pair(_sentence_separator.join(fragment1),
+                                                _sentence_separator.join(fragment2)):
+        return -10 * (len1+len2) #XXX
 
-    elif pair_manager.has_pair(_sentence_separator.join(fragment1),
-                               _sentence_separator.join(fragment2)):
-        return -5 * (len(fragment1)+len(fragment2)) #XXX
-
+    # length-based evaluation
     else:
         (r, angle) = polar(complex(sum(len(s) for s in fragment1),
                                    sum(len(s) for s in fragment2)))
         angle -= pi/4
         # angle close to 0 is more probable than a big one (normal distribution)
         # a letter is around 2.5 bits of entropy
-        #FIXME this r should be multiplied by some big factor, so that it
+        #XXX this r should be multiplied by some big factor, so that it
         # would make a true normal distribution with angle**2
         return r*2.5 * angle**2
 
@@ -65,10 +82,11 @@ def calculate_cost(fragment1, fragment2):
 def plot_flat(fun, rangex, rangey, path=None, filename=None):
     import matplotlib.pyplot as plt
 
-    print 'Plotting...',
-    sys.stdout.flush()
+    print >> sys.stderr, 'Plotting...',
+    sys.stderr.flush()
 
-    fig = plt.figure(figsize=(20, 20)) # in inches, @ 80dpi
+    size = max(rangex, rangey)/10
+    fig = plt.figure(figsize=(size, size)) # in inches, @ 80dpi
     ax = fig.add_subplot(111)
 
     data = np.array([np.array([fun(x, y) for x in xrange(rangex)])
@@ -87,7 +105,7 @@ def plot_flat(fun, rangex, rangey, path=None, filename=None):
         plt.savefig(filename)
     else:
         plt.show()
-    print '\rPlot done.      '
+    print >> sys.stderr, '\rPlot done.      '
 
 
 def align(seq1, seq2, plot_filename=None):
@@ -103,8 +121,6 @@ def align(seq1, seq2, plot_filename=None):
     prev = [ [None for j in range(len(seq2)+1)]
              for i in range(len(seq1)+1) ]
 
-    #TODO problem: how to skip many sentences at once?
-
     fragment_lengths = ((1, 0), (0, 1), # skip a sentence
                         (1, 1),         # match 1-1
                         (1, 2), (2, 1), # match 1-2
@@ -113,8 +129,8 @@ def align(seq1, seq2, plot_filename=None):
 
     # i, j: sentence numbers
     for i in xrange(0, len(seq1)+1):
-        print "\ri=%d (%.f%%)" % (i, i*100/(len(seq1)+1)),
-        sys.stdout.flush()
+        print >> sys.stderr, "\ri=%d (%.f%%)" % (i, i*100/(len(seq1)+1)),
+        sys.stderr.flush()
         for j in xrange(0, len(seq2)+1):
 
             # skipping some parts of the martix
@@ -133,7 +149,8 @@ def align(seq1, seq2, plot_filename=None):
                 # if skipping, then skipping as one big jump
                 #FIXME: this doesn't always find the best path,
                 # because sometimes it is not worth it to jump over
-                # just one sentence, so the jump won't start
+                # just one sentence, so the jump won't start.
+                # Perhaps some postprocessing will be needed to fix this.
                 if (fl_i, fl_j) == (1, 0):
                     while prev[_i][_j] and prev[_i][_j][1] == _j:
                         _i = prev[_i][_j][0]
@@ -148,10 +165,10 @@ def align(seq1, seq2, plot_filename=None):
                                                          seq2[_j:j])
 
                 if new_cost < cost[i][j]:
-                    #print _i, i, _j, j
+                    #print >> sys.stderr, _i, i, _j, j
                     cost[i][j] = new_cost
                     prev[i][j] = (_i, _j)
-    print '\rAlingment done'
+    print >> sys.stderr, '\rAlingment done'
 
     assert (i, j) == (len(seq1), len(seq2))
     path = [(i, j, 0.1)]
@@ -170,7 +187,7 @@ def align(seq1, seq2, plot_filename=None):
 
     # total cost: - log(probability of given alignment); not normalized
     # the smaller the better
-    print "Total cost: " + str(cost[len(seq1)][len(seq2)])
+    print >> sys.stderr, "Total cost: " + str(cost[len(seq1)][len(seq2)])
     return Alignment(reversed(path))
 
 
@@ -182,17 +199,36 @@ if __name__ == '__main__':
 #              plot_filename='similarity.png')
 
     from toolkit import Text, Alignment
+    import re
+    import codecs
 
     try:
-        [filename1, filename2] = sys.argv[1:]
-    except ValueError:
-        print __doc__
-        sys.exit()
+        filename1 = sys.argv[1]
+        filename2 = sys.argv[2]
+        opts = sys.argv[3:]
+        lang1 = re.match('.*\.([a-z]{2}).(txt|sentences)$', filename1).group(1)
+        lang2 = re.match('.*\.([a-z]{2}).(txt|sentences)$', filename2).group(1)
+    except (ValueError, AttributeError, IndexError):
+        print >> sys.stderr, __doc__
+        sys.exit(1)
 
-    t1 = list(Text.from_file(filename1, lang='pl').as_sentences_flat())
-    t2 = list(Text.from_file(filename2, lang='cu').as_sentences_flat())
+    def read(filename, lang):
+        if filename.endswith('.sentences'):
+            with codecs.open(filename, encoding='utf-8') as f:
+                return [l.strip() for l in f.readlines()]
+        else:
+            assert filename.endswith('.txt')
+            return list(Text.from_file(filename, lang=lang).as_sentences_flat())
 
-    a = align(t1, t2, plot_filename='plot.png')
+    t1 = read(filename1, lang1)
+    t2 = read(filename2, lang2)
+    pair_manager = PairManager.from_file('data/pairs.%s-%s' % (lang1, lang2))
 
-    a.pretty_print(t1, t2)
+    a = align(t1, t2,
+              plot_filename='plot.png' if '-plot' in opts else None)
 
+    if '-text' in opts:
+        a.pretty_print(t1, t2)
+    else:
+        for i, j, c in a.data:
+            print "%d\t%d\t%.2f" % (i, j, c)
