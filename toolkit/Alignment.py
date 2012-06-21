@@ -16,10 +16,11 @@ class Alignment:
 
     def __init__(self, data):
         """Constructor.
-        data: list of 3-tuples: (index1, index2, cost)
+        data: sequence of 3-tuples: (index1, index2, cost)
         """
         data = tuple(data)
-        assert isinstance(data[0], tuple)
+        if not data or not isinstance(data[0], tuple):
+            raise ValueError
         _i, _j = 0, 0
         for i, j, c in data:
             assert _i <= i, (_i, i)
@@ -89,13 +90,16 @@ class Alignment:
     def pretty_print(self, seq1, seq2):
         from textwrap import wrap
         from itertools import izip_longest
-        for ss1, ss2, c in list(self.as_ranges(seq1, seq2, with_costs=True)):
+        # ₀₁₂₃₄₅₆₇₈₉ ⁰¹²³⁴⁵⁶⁷⁸⁹ 𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡
+        for (_i, i), (_j, j), c in list(self.as_ranges(with_costs=True)):
             ls1 = []
-            for s in ss1:
-                ls1.extend(wrap(unicode('♦ ', 'utf-8') + s, 35))
+            for s, num in zip(seq1[_i:i], range(_i, i)):
+                n = unicode('♦', 'utf-8') + str(num) + ' '
+                ls1.extend(wrap(n + s, 35))
             ls2 = []
-            for s in ss2:
-                ls2.extend(wrap(unicode('♦ ', 'utf-8') + s, 35))
+            for s, num in zip(seq2[_j:j], range(_j, j)):
+                n = unicode('♦', 'utf-8') + str(num) + ' '
+                ls2.extend(wrap(n + s, 35))
             for l1, l2, c in izip_longest(ls1, ls2, ["%.1f" % c]):
                 l1 = l1 if l1 != None else ""
                 l2 = l2 if l2 != None else ""
