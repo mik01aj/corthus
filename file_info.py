@@ -1,7 +1,13 @@
 #!/usr/bin/python
 
 """
-Usage: ./file_info.py <files> ...
+Usage: ./file_info.py [options] <files> ...
+
+File can be a text or an alignment file.
+
+Common options: --type --basename --length
+For type-specific options see source.
+
 """
 
 import sys
@@ -23,9 +29,9 @@ def get_info(filename):
                  'text2' : "%s.%s.txt" % (m.group(1), m.group(3)),
                  'backend' : m.group(4),
                  'cost' : a.summed_cost(),
-                 'rungs' : len(a.data),
-                 'filename' : filename }
+                 'length' : len(a.data)}
 
+    # text file
     m = re.match('(.*)\.(\w\w).txt+$', filename)
     if m:
         from toolkit import Text
@@ -35,7 +41,6 @@ def get_info(filename):
                  'lang' : m.group(2),
                  'paragraphs' : len(t.as_paragraphs()),
                  'length' : len(t.as_string()),
-                 'filename' : filename,
                  'title' : t.as_paragraphs()[0] }
 
     return { 'filename' : filename,
@@ -43,11 +48,14 @@ def get_info(filename):
 
 
 if __name__ == '__main__':
-    filenames = sys.argv[1:]
+    args = sys.argv[1:]
+    fields    = [arg[2:] for arg in args if arg.startswith('--')]
+    filenames = [arg     for arg in args if not arg.startswith('--')]
     if not filenames:
         print __doc__
         sys.exit()
     for filename in filenames:
         print filename
         for k, v in sorted(get_info(filename).items()):
-            print "    %-12s %s" % (k+":", unicode(v).encode('utf-8'))
+            if not fields or k in fields:
+                print "    %-12s %s" % (k+":", unicode(v).encode('utf-8'))
