@@ -15,107 +15,129 @@ from __future__ import unicode_literals
 import sys
 
 pairs = [
-    (r"'",    "´"),
-    (r"`",    "´"),
-    (r"^",    "´"),
+    (r"'",    "\u0331"),
+    (r"`",    "\u0331"),
+    (r"^",    "\u0331"),
     (r"=",    ""),
-    (r"_",    ""),
-
-    (r"«",    "“"),
-    (r"»",    "”"),
-    (r"№",    "#"),
-    (r"–",    "-"),
     (r";",    "?"),
-
-    (r"Ь",    "'"),
-    (r"ь",    "'"),
-    (r"Ъ",    ""),
-    (r"ъ",    ""),
-
-    (r"0",    "0"),
-    (r"1",    "1"),
-    (r"2",    "2"),
-    (r"3",    "3"),
-    (r"4",    "4"),
-    (r"5",    "5"),
-    (r"6",    "6"),
-    (r"7",    "7"),
-    (r"8",    "8"),
-    (r"9",    "9"),
-
-    (r"а",    "a"),
-    (r"б",    "b"),
-    (r"C",    "C"),
-    (r"c",    "c"),
-    (r"д",    "d"),
-    (r"jь",   "e"),
-    (r"е",    "e"),
-    (r"э",    "e"),
-    (r"f",    "f"),
-    (r"ф",    "f"),
-    (r"г",    "g"),
-    (r"х",    "h"),
-    (r"i",    "i"),
-    (r"v\"",  "i"),
-    (r"v'",   "i"),
-    (r"и",    "i"),
-    (r"й",    "j"),
-    (r"к",    "k"),
-    (r"л",    "l"),
-    (r"м",    "m"),
-    (r"н",    "n"),
-    (r"_о",   "o"),
-    (r"w",    "o"),
-    (r"о",    "o"),
-    (r"_п",   "p"),
-    (r"п",    "p"),
-    (r"Q",    "Q"),
-    (r"q",    "q"),
-    (r"р",    "r"),
-    (r"\ъс",  "s"),
-    (r"с",    "s"),
-    (r"т",    "t"),
-    (r"\ъу",  "u"),
-    (r"о_у",  "u"),
-    (r"у",    "u"),
-    (r"v",    "v"),
-    (r"в",    "v"),
-    (r"X",    "X"),
-    (r"x",    "x"),
-    (r"Y",    "Y"),
-    (r"y",    "y"),
-    (r"ы",    "y"),
-    (r"s",    "z"),
-    (r"з",    "z"),
-    (r"\ъ_о", "o"),
-    (r"\ъw",  "w"),
-    (r"ч",    "ch"),
-    (r"я",    "ia"),
-    (r"ё",    "io"),
-    (r"ю",    "iu"),
-    (r"w\т",  "ot"),
-    (r"ш",    "sh"),
-    (r"ц",    "ts"),
-    (r"jа",   "ya"),
-    (r"\ъи",  "yi"),
-    (r"ж",    "zh"),
-    (r"чы",   "chi"),
-    (r"щ",    "sch"),
-    (r"шя",   "sha"),
-    (r"шы",   "shi"),
-    (r"гг",   "ng"),  # this is not always correct (а'ггелъ)
-    (r"щы",   "schi"),
 
     (r"а~",   "1"), # numbers
     (r"в~",   "2"),
     (r"г~",   "3"),
     (r"д~",   "4"),
     (r"е~",   "5"),
+    (r"s~",   "6"),
+    (r"з~",   "7"),
+    (r"и~",   "8"),
+    (r"f~",   "9"),
     (r"м~",   "40"),
+
+    (r"jь",   "je"),
+    (r"_е",   "je"),
+    (r"е",    "je"),
+    (r"э",    "je"),
+
+    (r"\ъи",  "ji"), # и̾
+    (r"i",    "i"),
+    ('v"',    "i"),
+    (r"v'",   "i"),
+    (r"и",    "i"),
+
+    (r"ль",   "l"),
+    (r"лi",   "li"),
+    (r"ля",   "lia"),
+    (r"лje",  "lie"),
+    (r"лю",   "liu"),
+    (r"л",    "ł"),
+
+    (r"s",    "z"),
+    (r"jа",   "ja"),
+    (r"шя",   "sza"),
+    (r"гг",   "ng"),  # this is not always correct (а'ггелъ)
+    (r"w\т",  "ot"),
+    (r"о_у",  "u"),
+
+    (r"а",    "a"),
+    (r"б",    "b"),
+    (r"ц",    "c"),
+    (r"д",    "d"),
+    (r"f",    "f"),
+    (r"ф",    "f"),
+    (r"г",    "g"),
+    (r"х",    "ch"),
+    (r"й",    "j"),
+    (r"к",    "k"),
+    (r"м",    "m"),
+    (r"нje",   "nie"),
+    (r"н",    "n"),
+    (r"w",    "o"),
+    (r"о",    "o"),
+    (r"п",    "p"),
+    (r"р",    "r"),
+    (r"с",    "s"),
+    (r"т",    "t"),
+    (r"у",    "u"),
+    (r"v",    "w"),
+    (r"в",    "w"),
+    (r"ы",    "y"),
+    (r"з",    "z"),
+    (r"ж",    "ż"),
+    (r"ч",    "cz"),
+    (r"я",    "ja"),
+    (r"ю",    "ju"),
+    (r"ш",    "sz"),
+    (r"щ",    "szcz"),
+
+    ("cje",   "ce"),
+    ("żje",   "że"),
+    ("szje",  "sze"),
+    ("czje",  "cze"),
+
+    ("pj",    "pi"),
+    ("bj",    "bi"),
+    ("fj",    "fi"),
+    ("wj",    "wi"),
+    ("sj",    "si"),
+    ("cj",    "ci"),
+    ("hj",    "hi"),
+    ("nj",    "ni"),
+    ("mj",    "mi"),
+    ("lj",    "li"),
+    ("łj",    "łi"),
+    ("kj",    "ki"),
+    ("gj",    "gi"),
+    ("tj",    "ti"),
+    ("dj",    "di"),
+    ("szj",   "szi"),
+    ("żj",    "żi"),
+    ("czj",   "czi"),
+    ("rj",    "ri"),
+
+    ("Ь",    "'"),
+    ("ь",    "'"),
+    ("n'",    "ń"),
+
+    ("czi",   "czy"),
+
+    ("ii",    "ij"),
+
+    (r"\ъ",   ""),
+    (r"Ъ",    ""),
+    (r"ъ",    ""),
+    (r"_",    ""),
 ]
 
-# sort pairs to have longest strings first
-pairs.sort(cmp=lambda (x, x2), (y, y2): -cmp(len(x), len(y)))
+def titlecase(string):
+    if string:
+        return string[0].upper() + string[1:]
+    else:
+        return ""
+
+def cu2pl(string):
+    for (pattern, replacement) in pairs:
+        string = string.replace(pattern, replacement)
+        string = string.replace(titlecase(pattern), titlecase(replacement))
+    return string
 
 if __name__ == '__main__':
     try:
@@ -126,14 +148,12 @@ if __name__ == '__main__':
             inputFile = open(filename)
     except ValueError:
         print __doc__
-        print "Strings replaced (in this order):"
+        print "Patterns replaced (in this order):"
         for (a, b) in pairs:
             print ("%20s → %s" % (a, b)).encode('utf-8')
         sys.exit()
     for line in inputFile:
-        line = line.decode('utf-8')
-        #TODO uppercase letters
-        for (string, replacement) in pairs: # damn slow
-            line = line.replace(string, replacement)
-        print line[:-1].encode('utf-8') # omitting '\n'
+        line = line[:-1].decode('utf-8') # omitting '\n'
+        line = cu2pl(line)
+        print line.encode('utf-8')
     inputFile.close()

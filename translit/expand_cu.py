@@ -13,7 +13,7 @@ from __future__ import unicode_literals
 import sys
 
 pairs = [
-    (r"_о=ч~",       "оте'ч"),
+    (r"а='гг~л",     "а='ггел"), # may cause problems
     (r"бл~г",        "бла'г"),
     (r"бл~ж",        "бла'ж"),
     (r"бл~зjь",      "бла'зjь"),
@@ -82,6 +82,7 @@ pairs = [
     (r"нб\с",        "небе'с"),
     (r"нб~с",        "небе'с"),
     (r"нн~",         "ны'н"),
+    (r"_о=ч~",       "оте'ч"),
     (r"_о='ч~",      "_о='тч"),
     (r"_о=ц~ъ",      "_о=те'ц`"),
     (r"_о=ц~",       "_о=тц"),
@@ -100,8 +101,9 @@ pairs = [
     (r"сл~н",        "со'лн"),
     (r"сп~с",        "спа'с"),
     (r"стр\ст",      "стра'ст"),
-    (r"сщ~",         "свя'щ"),
-    (r"ст~",         "свя'т"),
+    (r"сщ~",         "свящ"),
+    (r"ст~",         "свят"),
+    (r"ст~ъ",        "свя'тъ"),
     (r"сн~",         "сы'н"),
     (r"тр\оч",       "тро'ич"),
     (r"тр\оц",       "тро'иц"),
@@ -119,6 +121,21 @@ pairs = [
 # sort pairs to have longest strings first
 pairs.sort(cmp=lambda (x, x2), (y, y2): -cmp(len(x), len(y)))
 
+def titlecase(string):
+    if string:
+        if string[0].isalpha():
+            return string[0].upper() + string[1:]
+        else: # not correct, but enough
+            return string[:2].upper() + string[2:]
+    else:
+        return ""
+
+def expand_cu(string):
+    for (pattern, replacement) in pairs:
+        string = string.replace(pattern, replacement)
+        string = string.replace(titlecase(pattern), titlecase(replacement))
+    return string
+
 if __name__ == '__main__':
     try:
         [filename] = sys.argv[1:]
@@ -128,14 +145,12 @@ if __name__ == '__main__':
             inputFile = open(filename)
     except ValueError:
         print __doc__
-        print "Strings replaced (in this order):"
+        print "Patterns replaced (in this order):"
         for (a, b) in pairs:
             print ("%20s → %s" % (a, b)).encode('utf-8')
         sys.exit()
     for line in inputFile:
-        line = line.decode('utf-8')
-        #TODO uppercase letters
-        for (string, replacement) in pairs: # damn slow
-            line = line.replace(string, replacement)
-        print line[:-1].encode('utf-8') # omitting '\n'
+        line = line[:-1].decode('utf-8') # omitting '\n'
+        line = expand_cu(line)
+        print line.encode('utf-8')
     inputFile.close()
