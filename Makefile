@@ -5,7 +5,8 @@ H := $(shell if [ -f /usr/local/bin/h ]; then echo h; fi)
 all: sentences hunalign pairs my
 
 # Hunalign 1.1 binary
-HUNALIGN='/home/m01/Dropbox/corthus/poligon/hunalign-1.1/src/hunalign/hunalign'
+#HUNALIGN='/home/m01/Dropbox/corthus/poligon/hunalign-1.1/src/hunalign/hunalign'
+HUNALIGN='/home/d/dadela/hunalign-1.1/src/hunalign/hunalign'
 
 sentences: $(shell ./get_make_targets.py 1 .sentences)
 %.pl.sentences: %.pl.txt toolkit/sentence_splitter.py toolkit/text_export.py

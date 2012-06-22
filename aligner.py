@@ -134,8 +134,8 @@ def align(seq1, seq2, plot_filename=None):
         for j in xrange(0, len(seq2)+1):
 
             # skipping some parts of the martix
-#            if abs(i/len(seq1) - j/len(seq2)) > 0.3:
-#                continue
+            if abs(i/len(seq1) - j/len(seq2)) > 0.3:
+                continue
 
             # Iterating over possible matches.
             # Fragments tested end in i and j, respectively.
