@@ -40,6 +40,9 @@ class Alignment:
             writer = csv.writer(f, dialect='excel-tab')
             writer.writerows(self.data)
 
+    def summed_cost(self):
+        return sum(c for (i, j, c) in self.data)
+
     def as_ladder(self, with_costs=False):
         def gen():
             for i, j, c in self.data:
