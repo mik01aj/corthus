@@ -2,15 +2,18 @@
 # -*- coding: utf-8 -*-
 
 """
-Script for expanding church-slavonic abbreviations.
+Script for expanding church-slavonic abbreviations, and converting
+numbers to their normal form.
 
 Usage: ./expand_cu.py <file>  (to use text file as input)
        ./expand_cu.py -       (to use standard input)
 """
 
+
 from __future__ import unicode_literals
 
 import sys
+import re
 
 pairs = [
     (r"а='гг~л",     "а='ггел"), # may cause problems
@@ -130,11 +133,46 @@ def titlecase(string):
     else:
         return ""
 
-def expand_cu(string):
+def expand_cu(string, numbers=True):
     for (pattern, replacement) in pairs:
         string = string.replace(pattern, replacement)
         string = string.replace(titlecase(pattern), titlecase(replacement))
+        if numbers:
+            string = replace_numbers(string)
     return string
+
+
+numbers_1 = ('а', 'в', 'г', 'д', '_е', 's', 'з', 'и', 'f')
+numbers_10 = ('_i', 'к', 'л', 'м', 'н', '_кс', '_о', 'п', 'ч')
+numbers_100 = ('р', 'с', 'т', 'ф', 'х', '_у', '_пс', 'w\т', 'ц')
+
+def convert_number(m):
+    """Converts a church-slavonic number to normal form (assuming that
+    given text is really a number). Expects unicode input. Returns int.
+    """
+    number = 0
+    for i in range(9):
+        if numbers_1[i] in m: number += i+1
+        if numbers_10[i] in m: number += (i+1)*10
+        if numbers_100[i] in m: number += (i+1)*100
+    return number
+
+def replace_numbers(text):
+    # regex syntax: (?=...)  - look ahead,
+    #               (?<=...) - look behind
+    #               (?:...)  - groups that will not be referenced
+    #                       (--- this is what we really match    ---)
+    regex = ('(?<=[-\s\.<>])((?:$C~$B?|$C~?$B~)$A?|$B~$A?|$A~(?:_i)?)(?=[-\s\.,:$%\)\]])')
+    to_re = lambda l: '(%s)' % '|'.join(map(re.escape, l))
+    regex = regex.replace('$A', to_re(numbers_1))
+    regex = regex.replace('$B', to_re(numbers_10))
+    regex = regex.replace('$C', to_re(numbers_100))
+    text = " " + text + " "
+    text = re.sub(regex,
+                  lambda m: unicode(convert_number(m.group(0))),
+                  text, re.UNICODE | re.MULTILINE)
+    return text[1:-1]
+
 
 if __name__ == '__main__':
     try:
