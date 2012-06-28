@@ -107,9 +107,9 @@ class Alignment:
                 l1 = l1 if l1 != None else ""
                 l2 = l2 if l2 != None else ""
                 c = c if c != None else ""
-                s = unicode("%-35s │%-35s │%s", 'utf-8') % (l1, l2, c)
+                s = unicode("%-35s │%-35s │%4s", 'utf-8') % (l1, l2, c)
                 print s.encode('utf-8') # a workaround for `less`
-            print
+            print ' '*79
 
 
 if __name__ == '__main__':
@@ -127,3 +127,7 @@ if __name__ == '__main__':
                    t2.as_sentences_flat())
     print "Total cost: " + str(sum(c for (_, _, c) in a.data))
 
+#    for ss1, ss2, c in list(a.as_ranges(t1.as_sentences_flat(), t2.as_sentences_flat(), with_costs=True)):
+#        c /= 1+sum(len(s) for s in ss1) + sum(len(s) for s in ss2)
+#        c *= 10
+#        print "%3d %3d %30s|%s" % (len(ss1), len(ss2), '#'*-int(c), '#'*int(c))

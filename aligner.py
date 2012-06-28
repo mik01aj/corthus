@@ -22,8 +22,8 @@ from toolkit import Alignment, PairManager
 
 matplotlib.use('Agg')
 
-_paragraph_separator = unicode('¶', 'utf-8')
-#_paragraph_separator = unicode('<p>')
+#_paragraph_separator = unicode('¶', 'utf-8')
+_paragraph_separator = unicode('<p>')
 _sentence_separator = unicode(' ♦ ', 'utf-8')
 
 pair_manager = None #FIXME find some nice way to handle various languages
@@ -72,11 +72,12 @@ def calculate_cost(fragment1, fragment2):
         (r, angle) = polar(complex(sum(len(s) for s in fragment1),
                                    sum(len(s) for s in fragment2)))
         angle -= pi/4
+        join_penalty = len1 + len2 - 2
         # angle close to 0 is more probable than a big one (normal distribution)
         # a letter is around 2.5 bits of entropy
         #XXX this r should be multiplied by some big factor, so that it
         # would make a true normal distribution with angle**2
-        return r*2.5 * angle**2
+        return 1 + join_penalty + r*2.5 * angle**2
 
 
 def plot_flat(fun, rangex, rangey, path=None, filename=None):
@@ -177,7 +178,6 @@ def align(seq1, seq2, plot_filename=None):
         (i, j) = prev[i][j]
         c -= cost[i][j]
         path.append((i, j, c))
-    path.append((0, 0, 0.1))
 
     if plot_filename:
         plot_flat(lambda x, y: cost[x][y],
