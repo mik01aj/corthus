@@ -36,12 +36,16 @@ def get_info(filename):
     if m:
         from toolkit import Text
         t = Text.from_file(filename)
+        paragraphs = t.as_paragraphs()
+        title = paragraphs[0]
+        if paragraphs[0].startswith('('): # XXX
+            title = paragraphs[1]
         return { 'type' : 'text',
                  'basename' : m.group(1),
                  'lang' : m.group(2),
-                 'paragraphs' : len(t.as_paragraphs()),
+                 'paragraphs' : len(paragraphs),
                  'length' : len(t.as_string()),
-                 'title' : t.as_paragraphs()[0] }
+                 'title' : title }
 
     return { 'filename' : filename,
              'size' : os.path.getsize(filename) }
