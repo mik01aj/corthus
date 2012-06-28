@@ -16,12 +16,14 @@ import sys
 import re
 
 pairs = [
-    (r"а='гг~л",     "а='ггел"), # may cause problems
+    (r"гг~л",        "ггел"), # may cause problems (ангел)
+    (r"г~гл",        "ггел"),
     (r"бл~г",        "бла'г"),
     (r"бл~ж",        "бла'ж"),
     (r"бл~зjь",      "бла'зjь"),
     (r"блг\д",       "блгагода'"),
     (r"блг\с",       "блгагосло'"),
+    (r"w=блг\дти`",  "w=благодати`"),
     (r"бг~",         "бо'г"),
     (r"бг~ови",      "бо'гови"),
     (r"бж~",         "бо'ж"),
@@ -42,12 +44,13 @@ pairs = [
     (r"чт\сот",      "чистот"),
     (r"дв~д",        "давi'д"),
     (r"дв~",         "де'в"),
+    (r"дв\с",        "де'вс"),
     (r"дх~",         "ду'х"),
     (r"дс~",         "ду'ш"),
     (r"дш~",         "ду'ш"),
-    (r"_е=п\ск",     "_е=пi'ск"),
-    (r"_е=v\гл",     "_е=vа'ггел"),
-    (r"_е=v\глi'",   "_е=vаггели'"),
+    (r"п\ск",        "пi'ск"),       # епископ
+    (r"v\гл",        "vа'ггел"),     # евангелие
+    (r"v\глi'",      "vаггелi'"),
     (r"гл~г",        "глаг"),
     (r"гл~",         "глаго'л"),
     (r"гд\с",        "го'спод"),
@@ -60,10 +63,15 @@ pairs = [
     (r"гп\сже`",     "госпоже`"),
     (r"хр\ст",       "хрiст"),
     (r"i=и~с",       "i=ису'с"),
+    (r"iи~с",        "i=ису'с"),
     (r"i=и~лс",      "i=зра'илс"),
+    (r"iи~лс",       "i=зра'илс"),
     (r"i=и~лт",      "i=зра'илт"),
+    (r"iи~лт",       "i=зра'илт"),
     (r"i=ер\сл",     "i=ерусал"),
+    (r"iер\сл",      "i=ерусал"),
     (r"i=и~л",       "i=зраи'л"),
+    (r"iи~л",        "i=зраи'л"),
     (r"i=и~лi'",     "i=израили'"),
     (r"кн~",         "кня"),
     (r"кр~щ",        "кре'щ"),
@@ -85,12 +93,19 @@ pairs = [
     (r"нб\с",        "небе'с"),
     (r"нб~с",        "небе'с"),
     (r"нн~",         "ны'н"),
-    (r"_о=ч~",       "оте'ч"),
+    (r"_о=ч~",       "о=те'ч"),
+    (r"_оч~",        "о=те'ч"),
     (r"_о='ч~",      "_о='тч"),
-    (r"_о=ц~ъ",      "_о=те'ц`"),
+    (r"_о'ч~",       "_о='тч"),
+    (r"_о=ц~ъ",      "_о=те'цъ"),
+    (r"_оц~ъ",       "_о=те'цъ"),
     (r"_о=ц~",       "_о=тц"),
+    (r"_оц~",        "_о=тц"),
+    (r"о_у=ч~тл",    "о_у=чи'тел"),
+    (r"о_уч~тл",     "о_у=чи'тел"),
     (r"пл~т",        "пло'т"),
-    (r"п\сл",        "по'стол"),
+    (r"п\сл",        "по'стол"), # апостол
+    (r"п\ст",        "по'ст"),
     (r"п\слс",       "по'столс"),
     (r"прв\д",       "пра'вед"),
     (r"пр\дт",       "предт"),
@@ -111,18 +126,26 @@ pairs = [
     (r"тр\оч",       "тро'ич"),
     (r"тр\оц",       "тро'иц"),
     (r"цр~",         "ца'р"),
-    (r"цр\ств",      "ца'рств"),
+    (r"цр\с",        "ца'рс"),
     (r"цр~к",        "це'рк"),
     (r"вл\д",        "влады'"),
     (r"вл\дчц",      "влады'чиц"),
     (r"воскр~",      "воскре'"),
     (r"воскр\с",     "воскре'с"),
     (r"воскр\снiе",  "воскресе'ние"),
-    (r"w=блг\дти`",  "w=благодати`"),
+    (r"_пса\л",      "_псало'мъ"),
+    (r"за\ч",        "зача'ло"),
+    (r"пн\де",       "понедjь'льникъ"),
+    (r"вто\р",       "вто'рникъ"),
+    (r"ср\д",        "сре'д"),
+    (r"че\к",        "четверто'къ"),
+    (r"пя\к",        "пято'къ"),
+#    (r"",        "суббw'та"),
+    (r"нл\д",        "недjь'л"),
+    (r"с\х",        "сти'х"),
+#    (r"",        ""),
+#    (r"",        ""),
 ]
-
-# sort pairs to have longest strings first
-pairs.sort(cmp=lambda (x, x2), (y, y2): -cmp(len(x), len(y)))
 
 def titlecase(string):
     if string:
@@ -133,11 +156,32 @@ def titlecase(string):
     else:
         return ""
 
+def multi_replace(pairs, runs=1, longest_first=False, add_titlecase=False):
+    """This function returns a function, which replaces strings,
+    according to given pattern-replacement pairs. When matches overlap,
+    it replaces only the first one. To handle overlapping matches, one
+    can run this algorithm several times (use `runs` attribute)."""
+
+    if longest_first:
+        # sort pairs to have longest strings first
+        pairs.sort(cmp=lambda (x, x2), (y, y2): -cmp(len(x), len(y)))
+
+    regex = "(%s)" % '|'.join(re.escape(p[0]) for p in pairs)
+    regex = re.compile(regex, re.UNICODE)
+
+    replacements = dict(pairs)
+
+    def run_replace(string):
+        return regex.sub(lambda m: replacements[m.group(0)],
+                         string)
+    return run_replace
+
+pairs.extend([(titlecase(pattern), titlecase(replacement))
+              for pattern, replacement in pairs])
+expand_abbreviations = multi_replace(pairs)
+
 def expand_cu(string, numbers=True):
-    for (pattern, replacement) in pairs:
-        #TODO check if word already has accent - don't add a second one
-        string = string.replace(pattern, replacement)
-        string = string.replace(titlecase(pattern), titlecase(replacement))
+    string = expand_abbreviations(string)
     if numbers:
         string = replace_numbers(string)
     return string
@@ -146,6 +190,15 @@ def expand_cu(string, numbers=True):
 numbers_1 = ('а', 'в', 'г', 'д', '_е', 's', 'з', 'и', 'f')
 numbers_10 = ('_i', 'к', 'л', 'м', 'н', '_кс', '_о', 'п', 'ч')
 numbers_100 = ('р', 'с', 'т', 'ф', 'х', '_у', '_пс', 'w\т', 'ц')
+# regex syntax: (?=...) look ahead, (?<=...) look behind
+#                             (____this_is_what_we_really_match_______)
+number_regex = '(?<=[-\s\.<>])(($C~$B?|$C?~?$B~)$A?|$C?~?$B?~?$A~(_i)?)(?=[-\s\.,:$%\)\]])'
+to_re = lambda l: '(%s)' % '|'.join(map(re.escape, l))
+number_regex = number_regex.replace('$A', to_re(numbers_1))
+number_regex = number_regex.replace('$B', to_re(numbers_10))
+number_regex = number_regex.replace('$C', to_re(numbers_100))
+del(to_re)
+number_regex = re.compile(number_regex, re.UNICODE | re.MULTILINE)
 
 def convert_number(m):
     """Converts a church-slavonic number to normal form (assuming that
@@ -159,19 +212,9 @@ def convert_number(m):
     return number
 
 def replace_numbers(text):
-    # regex syntax: (?=...)  - look ahead,
-    #               (?<=...) - look behind
-    #               (?:...)  - groups that will not be referenced
-    #                       (--- this is what we really match    ---)
-    regex = ('(?<=[-\s\.<>])((?:$C~$B?|$C~?$B~)$A?|$B~$A?|$A~(?:_i)?)(?=[-\s\.,:$%\)\]])')
-    to_re = lambda l: '(%s)' % '|'.join(map(re.escape, l))
-    regex = regex.replace('$A', to_re(numbers_1))
-    regex = regex.replace('$B', to_re(numbers_10))
-    regex = regex.replace('$C', to_re(numbers_100))
     text = " " + text + " "
-    text = re.sub(regex,
-                  lambda m: unicode(convert_number(m.group(0))),
-                  text, re.UNICODE | re.MULTILINE)
+    text = number_regex.sub(lambda m: unicode(convert_number(m.group(0))),
+                            text)
     return text[1:-1]
 
 
