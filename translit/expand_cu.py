@@ -135,10 +135,11 @@ def titlecase(string):
 
 def expand_cu(string, numbers=True):
     for (pattern, replacement) in pairs:
+        #TODO check if word already has accent - don't add a second one
         string = string.replace(pattern, replacement)
         string = string.replace(titlecase(pattern), titlecase(replacement))
-        if numbers:
-            string = replace_numbers(string)
+    if numbers:
+        string = replace_numbers(string)
     return string
 
 

@@ -15,17 +15,6 @@ from __future__ import unicode_literals
 import sys
 
 pairs = [
-    (r"а~",   "1"), # numbers
-    (r"в~",   "2"),
-    (r"г~",   "3"),
-    (r"д~",   "4"),
-    (r"е~",   "5"),
-    (r"s~",   "6"),
-    (r"з~",   "7"),
-    (r"и~",   "8"),
-    (r"f~",   "9"),
-    (r"м~",   "40"),
-
     (r"jь",   "je"),
     (r"_е",   "je"),
     (r"е",    "je"),
