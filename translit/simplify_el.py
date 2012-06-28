@@ -5,6 +5,10 @@
 Script that simplifies makes Greek text to use only one accent type
 (tonos ´), and removes all diacritics, except for dialytika (¨).
 
+Output alphabet: αά β γ δ εέ ζ ηή θ ιίϊΐ κ λ μ ν ξ οό π ρ σς τ υύ φ χ ψ ωώ
+Interpunction:   ΄·.:;
+(not guaranteed)
+
 Usage: ./simplify_el.py <file>  (to use text file as input)
        ./simplify_el.py -       (to use standard input)
 """
@@ -14,13 +18,17 @@ from __future__ import unicode_literals
 import sys
 import unicodedata
 
+#
 # output_charset = "ςεέρτυύθιίϊοόπαάσδφγηήξκλζχψωώβνμ"
-# interpunction: ΄·.:;
+#
 
 def simplify_el(string):
     result = []
     for c in string:
-        name = unicodedata.name(c).split()
+        try:
+            name = unicodedata.name(c).split()
+        except ValueError:
+            continue
         if 'WITH' in name:
             assert name[4] == 'WITH'
             # possible diacritics: TONOS OXIA DIALYTIKA VARIA DASIA
@@ -40,6 +48,9 @@ def simplify_el(string):
         else:
             result.append(c)
     return ''.join(result)
+
+
+#TODO: convert Greek numbers, α' β' γ' δ' ε' στ' ζ' θ' - also with ’
 
 
 if __name__ == '__main__':
