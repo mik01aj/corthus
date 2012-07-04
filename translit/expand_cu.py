@@ -178,7 +178,7 @@ def multi_replace(pairs, runs=1, longest_first=False, add_titlecase=False):
 
 pairs.extend([(titlecase(pattern), titlecase(replacement))
               for pattern, replacement in pairs])
-expand_abbreviations = multi_replace(pairs)
+expand_abbreviations = multi_replace(pairs, longest_first=True, add_titlecase=True)
 
 def expand_cu(string, numbers=True):
     string = expand_abbreviations(string)
@@ -191,8 +191,8 @@ numbers_1 = ('а', 'в', 'г', 'д', '_е', 's', 'з', 'и', 'f')
 numbers_10 = ('_i', 'к', 'л', 'м', 'н', '_кс', '_о', 'п', 'ч')
 numbers_100 = ('р', 'с', 'т', 'ф', 'х', '_у', '_пс', 'w\т', 'ц')
 # regex syntax: (?=...) look ahead, (?<=...) look behind
-#                             (____this_is_what_we_really_match_______)
-number_regex = '(?<=[-\s\.<>])(($C~$B?|$C?~?$B~)$A?|$C?~?$B?~?$A~(_i)?)(?=[-\s\.,:$%\)\]])'
+#                                (____this_is_what_we_really_match_______)
+number_regex = '(?<=[-\s\.<\(\[])(($C~$B?|$C?~?$B~)$A?|$C?~?$B?~?$A~(_i)?)(?=[-\s\.,:$%\)\]>])'
 to_re = lambda l: '(%s)' % '|'.join(map(re.escape, l))
 number_regex = number_regex.replace('$A', to_re(numbers_1))
 number_regex = number_regex.replace('$B', to_re(numbers_10))

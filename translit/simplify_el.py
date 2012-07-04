@@ -5,7 +5,7 @@
 Script that simplifies makes Greek text to use only one accent type
 (tonos ´), and removes all diacritics, except for dialytika (¨).
 
-Output alphabet: αά β γ δ εέ ζ ηή θ ιίϊΐ κ λ μ ν ξ οό π ρ σς τ υύ φ χ ψ ωώ
+Output alphabet: αά β γ δ εέ ζ ηή θ ιίϊΐ κ λ μ ν ξ οό π ρ σς τ υύϋΰ φ χ ψ ωώ
 Interpunction:   ΄·.:;
 (not guaranteed)
 
