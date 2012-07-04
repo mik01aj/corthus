@@ -53,13 +53,36 @@ def get_info(filename):
 
 if __name__ == '__main__':
     args = sys.argv[1:]
-    fields    = [arg[2:] for arg in args if arg.startswith('--')]
+    options   = [arg[2:] for arg in args if arg.startswith('--')]
     filenames = [arg     for arg in args if not arg.startswith('--')]
     if not filenames:
         print __doc__
         sys.exit()
-    for filename in filenames:
-        print filename
-        for k, v in sorted(get_info(filename).items()):
-            if not fields or k in fields:
-                print "    %-12s %s" % (k+":", unicode(v).encode('utf-8'))
+    if 'group' in options:
+        grouped = {}
+        while filenames:
+            filename = filenames.pop()
+            m = re.match('(.+)\.([a-z]{2}-[a-z]{2}\..*)', filename)
+            if m:
+                basename = m.group(1)
+                suffix = m.group(2)
+                grouped[basename] = grouped.get(basename, []) + [suffix]
+        for basename, suffixes in grouped.items():
+            print basename
+            for suffix in suffixes:
+                print "    " + suffix
+                for k, v in sorted(get_info(basename + "." + suffix).items()):
+                    if not options or k in options:
+                        print "        %-12s %s" % (k+":", unicode(v).encode('utf-8'))
+    else:
+        if len(options) == 1:
+            maxlen = max(len(filename) for filename in filenames)
+            for filename in filenames:
+                # tricky ;)
+                print "%%-%ds %%s" % maxlen % (filename, get_info(filename)[options[0]])
+        else:
+            for filename in filenames:
+                print filename
+                for k, v in sorted(get_info(filename).items()):
+                    if not options or k in options:
+                        print "    %-12s %s" % (k+":", unicode(v).encode('utf-8'))
