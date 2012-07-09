@@ -37,19 +37,18 @@ def export_for_giza(file1, lang1, file2, lang2, alignment_file,
         for _, s in bisents:
             f.write(s.encode('utf-8') + '\n')
 
-def export_for_hunalign(input_file, lang, output_file):
+def export_for_hunalign(input_file, lang):
     t = Text.from_file(input_file, lang)
-    with open(output_file, 'w') as f:
-        for s in t.as_sentences(paragraph_separator='<p>'):
-            #TODO transliterate
-            f.write(s.encode('utf-8') + '\n')
+    for s in t.as_sentences(paragraph_separator='<p>'):
+        #TODO transliterate
+        print s.encode('utf-8')
 
 if __name__ == '__main__':
 
     if sys.argv[1] == 'giza':
         export_for_giza(*sys.argv[1:])
     elif sys.argv[1] == 'hunalign':
-        (input_file, lang, output_file) = sys.argv[2:]
-        export_for_hunalign(input_file, lang, output_file)
+        (input_file, lang) = sys.argv[2:]
+        export_for_hunalign(input_file, lang)
     else:
         print __doc__

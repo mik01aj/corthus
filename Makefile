@@ -10,11 +10,11 @@ HUNALIGN='/home/d/dadela/hunalign-1.1/src/hunalign/hunalign'
 
 sentences: $(shell ./get_make_targets.py 1 .sentences)
 %.pl.sentences: %.pl.txt toolkit/sentence_splitter.py toolkit/text_export.py
-	./toolkit/text_export.py hunalign $< pl $@
+	./toolkit/text_export.py hunalign $< pl > $@
 %.cu.sentences: %.cu.txt toolkit/sentence_splitter.py toolkit/text_export.py
-	./toolkit/text_export.py hunalign $< cu $@
+	./toolkit/text_export.py hunalign $< cu > $@
 %.el.sentences: %.el.txt toolkit/sentence_splitter.py toolkit/text_export.py
-	./toolkit/text_export.py hunalign $< el $@
+	./toolkit/text_export.py hunalign $< el > $@
 clean-sentences:
 	find texts/ -name '*.??.sentences' -delete
 
