@@ -18,9 +18,11 @@ import sys
 import re
 import unicodedata
 
+WARNINGS_ENABLED = True # changed also by metaphone function
+
 metaphone_charset = "aeiou-#?bcdfhjkl7mnprstvz2"
 
-ignored_chars = ".,:;!?@΄··()[]{}<>«»„”–*"
+ignored_chars = ".,:;!?@΄῞∙··()[]{}<>«»„”\"–*"
 ignored_chars_regex = re.compile("["+re.escape(ignored_chars)+"]", re.UNICODE)
 
 pairs_pl = [
@@ -159,8 +161,9 @@ def metaphone_generic(pairs, word, lang='<?>'):
         word = word[0] + word[1:].replace(vowel, '')
     for c in word:
         if c not in metaphone_charset:
-            print >> sys.stderr, ("invalid char here: %s → %s (lang: %s)"
-                                  % (original_word, word, lang)).encode('utf-8')
+            if WARNINGS_ENABLED:
+                print >> sys.stderr, ("invalid char here: %s → %s (lang: %s)"
+                                      % (original_word, word, lang)).encode('utf-8')
             return '?'
     return word[:6] # cutting to 6 chars
 
@@ -196,14 +199,19 @@ def metaphone(word, lang=None):
                 'el' : metaphone_el }[lang]
         return fun(word)
     except KeyError:
-        m = metaphone_cu(word)
-        if m != '?':
+        try:
+            global WARNINGS_ENABLED
+            WARNINGS_ENABLED = False
+            m = metaphone_cu(word)
+            if m != '?':
+                return m
+            m = metaphone_pl(word)
+            if m != '?':
+                return m
+            m = metaphone_el(word)
             return m
-        m = metaphone_pl(word)
-        if m != '?':
-            return m
-        m = metaphone_el(word)
-        return m
+        finally:
+            WARNINGS_ENABLED = True
 
 def detect_language(text):
     """The only diference between this function and single-word `metaphone`:
