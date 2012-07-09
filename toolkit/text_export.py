@@ -1,8 +1,5 @@
 #!/usr/bin/python
-
-import sys
-from Text import Text
-from Alignment import Alignment
+# -*- coding: utf-8 -*-
 
 """
 Exporting a Text to various formats. This script is also usable from
@@ -13,6 +10,13 @@ Usage:
                           <alignment-file> <output1> <output2>
     ./text_export.py hunalign <input-file> <lang> <output-file>
 """
+
+from __future__ import unicode_literals
+
+import sys
+from Text import Text
+from Alignment import Alignment
+
 
 def extract_bisents(file1, lang1, file2, lang2, alignment_file):
     assert isinstance(lang1, (unicode, str)) and len(lang1)==2
@@ -38,10 +42,14 @@ def export_for_giza(file1, lang1, file2, lang2, alignment_file,
             f.write(s.encode('utf-8') + '\n')
 
 def export_for_hunalign(input_file, lang):
+    from translit.metaphone import metaphone
     t = Text.from_file(input_file, lang)
-    for s in t.as_sentences(paragraph_separator='<p>'):
-        #TODO transliterate
-        print s.encode('utf-8')
+    for s in t.as_sentences(paragraph_separator='¶'):
+        if s == '¶':
+            print '<p>'
+        else:
+            s = ' '.join(metaphone(w) for w in s.split())
+            print s
 
 if __name__ == '__main__':
 

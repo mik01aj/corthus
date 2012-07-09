@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Script that transliterates church-slavonic to polish.
+Script that transliterates church-slavonic to English.
 It doesn't expand abbreviations, for that use another script.
 
 Usage: ./cu2pl.py <file>  (to use text file as input)

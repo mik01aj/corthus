@@ -180,7 +180,7 @@ def metaphone_el(word):
         word = word[:-1]
     return metaphone_generic(pairs_el, word, 'el')
 
-def metaphone(word):
+def metaphone(word, lang=None):
     word = word.lower()
     word = ignored_chars_regex.sub("", word)
     if not word:
@@ -188,18 +188,45 @@ def metaphone(word):
     m = re.match('[^\w]*([0-9]+)[^\w]*', word)
     if m:
         return "#" + m.group(1) # a number
-    for c in word:
+    if not lang:
+        lang = detect_language(word)
+    try:
+        fun = { 'pl' : metaphone_pl,
+                'cu' : metaphone_cu,
+                'el' : metaphone_el }[lang]
+        return fun(word)
+    except KeyError:
+        m = metaphone_cu(word)
+        if m != '?':
+            return m
+        m = metaphone_pl(word)
+        if m != '?':
+            return m
+        m = metaphone_el(word)
+        return m
+
+def detect_language(text):
+    """The only diference between this function and single-word `metaphone`:
+    language detection is done only once (so not on per-word basis)
+    """
+    for c in text: # assuming text is lowercase
         try:
             if c in "żółćęśąźń":
-                return metaphone_pl(word)
+                return 'pl'
             name = unicodedata.name(c).split()
             if name[0] == 'CYRILLIC' or c in "~^=": # XXX = is also in titles
-                return metaphone_cu(word)
+                return 'cu'
             if name[0] == 'GREEK':
-                return metaphone_el(word)
+                return 'el'
         except ValueError:
             pass
-    return metaphone_pl(word)
+    return None
+
+
+def metaphone_text(text):
+    text = text.lower()
+    lang = detect_language(text)
+    return [metaphone(word, lang) for word in text.split()]
 
 #def test():
 #    cu_examples = [("прилjь'жнw",     "prile2no"),
@@ -241,8 +268,6 @@ if __name__ == '__main__':
         sys.exit()
     for line in inputFile:
         line = line[:-1].decode('utf-8') # omitting '\n'
-        words = []
-        for word in line.split():
-            words.append(metaphone(word))
-        print " ".join(words)
+        keys = [metaphone(word) for word in line.split()]
+        print " ".join(keys)
     inputFile.close()

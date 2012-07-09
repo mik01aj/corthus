@@ -7,7 +7,7 @@ from collections import defaultdict
 import sys
 import re
 
-from translit.metaphone import metaphone, ignored_chars
+from toolkit.translit.metaphone import metaphone, ignored_chars
 
 groups = defaultdict(lambda: set())
 
