@@ -22,7 +22,7 @@ WARNINGS_ENABLED = True # changed also by metaphone function
 
 metaphone_charset = "aeiou-#?bcdfhjkl7mnprstvz2"
 
-ignored_chars = ".,:;!?@΄῞∙··()[]{}<>«»„”\"–*"
+ignored_chars = ".,:;!?@΄᾽῞∙··()[]{}<>«»„”\"–\xad*…" # \xad - soft hyphen
 ignored_chars_regex = re.compile("["+re.escape(ignored_chars)+"]", re.UNICODE)
 
 pairs_pl = [
@@ -44,6 +44,7 @@ pairs_pl = [
     ("ń",   "n"),
     ("w",   "v"),
     ("y",   "i"),
+    ("é",   "e"), # used in old Polish
     ]
 
 pairs_cu = [
