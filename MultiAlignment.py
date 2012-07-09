@@ -21,7 +21,7 @@ class MultiAlignment:
     expects N sequences (the original sequences, which were aligned).
     """
 
-    def __init__(self, data, add_zeros=False):
+    def __init__(self, data, add_zeros=False, no_costs=False):
         """Constructor.
 
         data: sequence of N-tuples: (index_1, index_2, ..., index_N, cost)
@@ -29,17 +29,21 @@ class MultiAlignment:
         If the first row does not contaion zeros, and the alignment
         starts at the beginning of sequence, you can add them with
         add_zeros=True. (needed with hunalign)
+
+        If your data doesn't contain costs, use no_costs=True option.
         """
-        data = tuple(data)
-        if not data:
-            raise ValueError
+        data = list(data)
+        assert data
+        if no_costs:
+            for i in xrange(len(data)):
+                data[i] = tuple(data[i]) + (0, )
         N = len(data[0]) - 1
-        if N < 2:
-            raise ValueError
+        assert N >= 2
+        assert data[0][-1]*0 + 1
         previous_row = [0 for i in range(N)]
         for row in data:
-            if len(row) != N+1 or not all(row[i] >= previous_row[i] for i in range(N)):
-                raise ValueError
+            assert len(row) == N+1
+            assert all(row[i] >= previous_row[i] for i in range(N))
             previous_row = row
         if add_zeros:
             data = (tuple(0 for i in range(N+1)), ) + data # first cost=0
@@ -66,14 +70,15 @@ class MultiAlignment:
         """Iterates over rungs of the alignment (like in Hunalign's output)
         """
         if with_costs:
-            return data
+            return self.data
         else:
-            return tuple(row[:-1] for row in data)
+            return tuple(row[:-1] for row in self.data)
 
     def as_ranges(self, *sequences, **kwargs):
         """sequences parameter is optional here
         """
         with_costs = kwargs.get('with_costs', False)
+        assert all(k in ['with_costs'] for k in kwargs)
         def gen():
             previous_row = self.data[0]
             if len(sequences) != 0 and len(sequences) != self.N:

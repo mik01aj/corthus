@@ -31,6 +31,10 @@ class Text(object):
         self.lang = lang
         self.name = name
 
+        if not self.lang:
+            import sys
+            print >> sys.stderr, "No lang specified for " + self
+
     @classmethod
     def from_file(cls, file_path, *args, **kwargs):
         with codecs.open(file_path, encoding=kwargs.get('coding', 'utf-8')) as f:
@@ -68,6 +72,9 @@ class Text(object):
                  for p in self.paragraphs ]
 
     # maybe also as words?
+
+    def __str__(self):
+        return 'Text:"%s..."' % self.paragraphs[0][:20]
 
 def _read_paragraphs(stream, coding='utf-8'):
     '''A generator to read a stream by paragraphs (separated by "\n\n").
