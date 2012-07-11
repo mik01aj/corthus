@@ -283,7 +283,7 @@ pairs = [
 pairs = dict(pairs)
 max_pattern_len = max(len(k) for k in pairs)
 
-def render(string):
+def render_cu(string):
     result = ""
     last_char_was_upper = False
 

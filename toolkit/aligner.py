@@ -18,7 +18,9 @@ from math import log, exp, sqrt, pi, atan
 import numpy as np
 from cmath import polar
 import sys
-from toolkit import Alignment, PairManager
+
+from Alignment import Alignment
+from PairManager import PairManager
 
 matplotlib.use('Agg')
 
@@ -198,9 +200,10 @@ if __name__ == '__main__':
 #    plot_flat(lambda x, y: similarity('a'*x, 'b'*y), 100, 100,
 #              plot_filename='similarity.png')
 
-    from toolkit import Text, Alignment
+    from Text import Text
     import re
     import codecs
+    import os.path
 
     try:
         filename1 = sys.argv[1]
@@ -222,7 +225,9 @@ if __name__ == '__main__':
 
     t1 = read(filename1, lang1)
     t2 = read(filename2, lang2)
-    pair_manager = PairManager.from_file('data/pairs.%s-%s' % (lang1, lang2))
+    pairfile = os.path.join(os.path.dirname(__file__),
+                            '../data/pairs.%s-%s' % (lang1, lang2))
+    pair_manager = PairManager.from_file(pairfile)
 
     a = align(t1, t2,
               plot_filename='plot.png' if '-plot' in opts else None)

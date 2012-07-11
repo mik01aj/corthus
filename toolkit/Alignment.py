@@ -3,37 +3,60 @@
 
 """
 This module contains the Alignment class, which is used to handle
-text alignments. You can also run this file from the command line
-to pretty-print an alignment.
+multi-language (2 or more) alignments.
+
+You can also run this file from the command line to pretty-print an
+alignment.
 """
+
+from __future__ import unicode_literals
 
 import csv
 
 class Alignment:
 
-    """A class to hold an alignment. It doesn't know anything about the texts.
+    """A class to hold an N-way alignment. It doesn't know anything
+    about the texts. Only some methods, which need to access the text,
+    have a *sequences parameter. This means, each of these methods
+    expects N sequences (the original sequences, which were aligned).
     """
 
-    def __init__(self, data):
+    def __init__(self, data, add_zeros=False, no_costs=False):
         """Constructor.
-        data: sequence of 3-tuples: (index1, index2, cost)
+
+        data: sequence of N-tuples: (index_1, index_2, ..., index_N, cost)
+
+        If the first row does not contaion zeros, and the alignment
+        starts at the beginning of sequence, you can add them with
+        add_zeros=True. (needed with hunalign)
+
+        If your data doesn't contain costs, use no_costs=True option.
         """
-        data = tuple(data)
-        if not data or not isinstance(data[0], tuple):
-            raise ValueError
-        _i, _j = 0, 0
-        for i, j, c in data:
-            assert _i <= i, (_i, i)
-            assert _j <= j, (_j, j)
-            _i, _j = i, j
+        data = list(data)
+        assert data
+        if no_costs:
+            for i in xrange(len(data)):
+                data[i] = tuple(data[i]) + (0, )
+        N = len(data[0]) - 1
+        assert N >= 2
+        assert data[0][-1]*0 + 1
+        previous_row = [0 for i in range(N)]
+        for row in data:
+            assert len(row) == N+1
+            assert all(row[i] >= previous_row[i] for i in range(N))
+            previous_row = row
+        if add_zeros:
+            data = (tuple(0 for i in range(N+1)), ) + data # first cost=0
         self.data = data
+        self.N = N
 
     @classmethod
     def from_file(cls, file_path, *args, **kwargs):
+        data = []
         with open(file_path) as f:
-            return Alignment([(int(i), int(j), float(k))
-                              for (i, j, k) in csv.reader(f, dialect='excel-tab')],
-                             *args, **kwargs)
+            for row in csv.reader(f, dialect='excel-tab'):
+                data.append([int(x) for x in row[:-1]] + [float(row[-1])])
+        return Alignment(data, *args, **kwargs)
 
     def dump(self, file_path):
         with open(file_path, 'w') as f:
@@ -41,75 +64,92 @@ class Alignment:
             writer.writerows(self.data)
 
     def summed_cost(self):
-        return sum(c for (i, j, c) in self.data)
+        return sum(row[-1] for row in self.data)
 
     def as_ladder(self, with_costs=False):
-        def gen():
-            for i, j, c in self.data:
-                if with_costs:
-                    yield i, j, c
-                else:
-                    yield i, j
-        return tuple(gen())
+        """Iterates over rungs of the alignment (like in Hunalign's output)
+        """
+        if with_costs:
+            return self.data
+        else:
+            return tuple(row[:-1] for row in self.data)
 
-    def as_ranges(self, seq1=None, seq2=None, with_costs=False):
+    def as_ranges(self, *sequences, **kwargs):
+        """sequences parameter is optional here
+        """
+        with_costs = kwargs.get('with_costs', False)
+        assert all(k in ['with_costs'] for k in kwargs)
         def gen():
-            _i, _j, _c = 0, 0, 1
-            for i, j, c in self.data:
-                s1 = seq1[_i:i] if seq1 else (_i, i)
-                s2 = seq2[_j:j] if seq2 else (_j, j)
-                if with_costs:
-                    yield s1, s2, _c
+            previous_row = self.data[0]
+            if len(sequences) != 0 and len(sequences) != self.N:
+                raise ValueError
+            for row in self.data[1:]:
+                result_row = []
+                if sequences:
+                    for i in range(self.N):
+                        if len(sequences[i]) <= row[i]:
+                            raise IndexError("sequence too short", i, row[i], sequences[i])
+                        result_row.append(sequences[i][previous_row[i]:row[i]])
                 else:
-                    yield s1, s2
-                _i, _j, _c = i, j, c
-        return tuple(gen())
+                    result_row = [(previous_row[i], row[i]) for i in range(self.N)]
+                if with_costs:
+                    result_row.append(previous_row[-1]) #XXX cost shifted one row
+                yield result_row
+                previous_row = row
+        return list(gen())
 
-    def as_pairs(self, seq1=None, seq2=None, with_costs=False):
+    def as_pairs(self, *sequences, **kwargs):
         """Iterate only over 1-1 matches. This means bisentences in a
-        sentence-level alignment.
+        sentence-level alignment. Sequences parameter is optional.
         """
         def gen():
-            _i, _j, _c = 0, 0, 1
-            for i, j, c in self.data:
-                if (i, j) == (_i + 1, _j + 1):
-                    s1 = seq1[_i] if seq1 else _i
-                    s2 = seq2[_j] if seq2 else _j
-                    if with_costs:
-                        yield s1, s2, _c
-                    else:
-                        yield s1, s2
-                _i, _j, _c = i, j, c
-        return tuple(gen())
+            if sequences:
+                for range_row in self.as_ranges(sequences, **kwargs):
+                    if all(len(range_row[i]) == 1 for i in range(self.N)):
+                        yield range_row
+            else:
+                range_rows = self.as_ranges(sequences, **kwargs)
+                previous_row = range_rows[0]
+                for range_row in range_rows[1:]:
+                    if all(range_row[i] - previous_row[i] == 1 for i in range(self.N)):
+                        yield range_row
+                    previous_row = range_row
+        return list(gen())
 
     def evaluate(self, golden):
-        intersection = set((i, j) for (i, j, c) in self.data) & \
-                       set((i, j) for (i, j, c) in golden)
+        """Return precision and recall from comparison of two alignments.
+        """
+        intersection = set(row[:-1] for row in self.data) & \
+                       set(row[:-1] for row in golden)
         precision = len(intersection) / len(self.data)
         recall = len(intersection) / len(golden)
         return "Precision: %.2f%%, Recall: %.2f%%" % (precision*100, recall*100)
         #return (precision, recall)
 
-    def pretty_print(self, seq1, seq2):
+    def pretty_print(self, *sequences):
         from textwrap import wrap
         from itertools import izip_longest
+        if len(sequences) != self.N:
+            raise ValueError
         # ₀₁₂₃₄₅₆₇₈₉ ⁰¹²³⁴⁵⁶⁷⁸⁹ 𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡
-        for (_i, i), (_j, j), c in list(self.as_ranges(with_costs=True)):
-            ls1 = []
-            for s, num in zip(seq1[_i:i], range(_i, i)):
-                n = unicode('♦', 'utf-8') + str(num) + ' '
-                ls1.extend(wrap(n + s, 35))
-            ls2 = []
-            for s, num in zip(seq2[_j:j], range(_j, j)):
-                n = unicode('♦', 'utf-8') + str(num) + ' '
-                ls2.extend(wrap(n + s, 35))
-            for l1, l2, c in izip_longest(ls1, ls2, ["%.1f" % c]):
-                l1 = l1 if l1 != None else ""
-                l2 = l2 if l2 != None else ""
-                c = c if c != None else ""
-                s = unicode("%-35s │%-35s │%4s", 'utf-8') % (l1, l2, c)
+        for row in list(self.as_ranges(with_costs=True)):
+            lines = [] # will be a list of lists
+            for i in range(self.N):
+                lines.append([])
+                _j, j = row[i]
+                for s, num in zip(sequences[i][_j:j], range(_j, j)):
+                    n = '♦' + unicode(num) + ' '
+                    lines[-1].extend(wrap(n + s, 35))
+            lines.append(["%.1f" % row[-1]]) # cost
+            for output_row in izip_longest(*lines): # one output_row = one line of output
+                output_row = list(output_row)
+                for i in range(self.N+1):
+                    if output_row[i] == None:
+                        output_row[i] = ""
+                s = "|".join("%-35s " % col for col in output_row[:-1])
+                s += " |" + output_row[-1]
                 print s.encode('utf-8') # a workaround for `less`
-            print ' '*79
+            print
 
 
 if __name__ == '__main__':
@@ -127,7 +167,3 @@ if __name__ == '__main__':
                    t2.as_sentences_flat())
     print "Total cost: " + str(sum(c for (_, _, c) in a.data))
 
-#    for ss1, ss2, c in list(a.as_ranges(t1.as_sentences_flat(), t2.as_sentences_flat(), with_costs=True)):
-#        c /= 1+sum(len(s) for s in ss1) + sum(len(s) for s in ss2)
-#        c *= 10
-#        print "%3d %3d %30s|%s" % (len(ss1), len(ss2), '#'*-int(c), '#'*int(c))
