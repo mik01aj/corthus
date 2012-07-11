@@ -22,7 +22,7 @@ WARNINGS_ENABLED = True # changed also by metaphone function
 
 metaphone_charset = "aeiou-#?bcdfhjkl7mnprstvz2"
 
-ignored_chars = ".,:;!?@΄᾽῞∙··()[]{}<>«»„”\"–\xad*…" # \xad - soft hyphen
+ignored_chars = ".,:;!?@΄᾽῞∙··()[]{}<>«»„”\"–*…\xad" # \xad - soft hyphen
 ignored_chars_regex = re.compile("["+re.escape(ignored_chars)+"]", re.UNICODE)
 
 pairs_pl = [
@@ -220,7 +220,8 @@ def detect_language(text):
     """
     for c in text: # assuming text is lowercase
         try:
-            if c in "żółćęśąźń":
+            if c in "żółćęśąźńz":
+                # (z doesn't occur in Church-slavonic and is very rare in English)
                 return 'pl'
             name = unicodedata.name(c).split()
             if name[0] == 'CYRILLIC' or c in "~^=": # XXX = is also in titles
@@ -277,6 +278,5 @@ if __name__ == '__main__':
         sys.exit()
     for line in inputFile:
         line = line[:-1].decode('utf-8') # omitting '\n'
-        keys = [metaphone(word) for word in line.split()]
-        print " ".join(keys)
+        print " ".join(metaphone_text(line))
     inputFile.close()

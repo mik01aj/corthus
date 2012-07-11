@@ -73,6 +73,7 @@ pairs = [
     (r"i=и~л",       "i=зраи'л"),
     (r"iи~л",        "i=зраи'л"),
     (r"i=и~лi'",     "i=израили'"),
+    (r"и='м\рк",     "и='мярек"),
     (r"кн~",         "кня"),
     (r"кр~щ",        "кре'щ"),
     (r"кр\ст",       "крест"),
@@ -144,7 +145,7 @@ pairs = [
     (r"пя\к",        "пято'къ"),
 #    (r"",        "суббw'та"),
     (r"нл\д",        "недjь'л"),
-    (r"с\х",        "сти'х"),
+    (r"с\х",         "сти'х"),
 #    (r"",        ""),
 #    (r"",        ""),
 ]
@@ -193,8 +194,8 @@ numbers_1 = ('а', 'в', 'г', 'д', '_е', 's', 'з', 'и', 'f')
 numbers_10 = ('_i', 'к', 'л', 'м', 'н', '_кс', '_о', 'п', 'ч')
 numbers_100 = ('р', 'с', 'т', 'ф', 'х', '_у', '_пс', 'w\т', 'ц')
 # regex syntax: (?=...) look ahead, (?<=...) look behind
-#                                (____this_is_what_we_really_match_______)
-number_regex = '(?<=[-\s\.<\(\[])(($C~$B?|$C?~?$B~)$A?|$C?~?$B?~?$A~(_i)?)(?=[-\s\.,:$%\)\]>])'
+#                                (_________this_is_what_we_really_match________)
+number_regex = '(?<=[-\s\.<\(\[])((#$A)?($C~$B?|$C?~?$B~)$A?|$C?~?$B?~?$A~(_i)?)(?=[-\s\.,:$%\)\]>])'
 to_re = lambda l: '(%s)' % '|'.join(map(re.escape, l))
 number_regex = number_regex.replace('$A', to_re(numbers_1))
 number_regex = number_regex.replace('$B', to_re(numbers_10))
@@ -205,11 +206,18 @@ number_regex = re.compile(number_regex, re.UNICODE | re.MULTILINE)
 def convert_number(m):
     """Converts a church-slavonic number to normal form (assuming that
     given text is really a number). Expects unicode input. Returns int.
+    Handles numbers up to 9999.
     """
     number = 0
+    if m.startswith("#"): # thousands
+        for i in range(9):
+            if numbers_1[i] in m[1:3]:
+                number += (i+1)*1000
+                m = m[len('#' + numbers_1[i]):]
+                break
     for i in range(9):
-        if numbers_1[i] in m: number += i+1
-        if numbers_10[i] in m: number += (i+1)*10
+        if numbers_1[i]   in m: number += (i+1)
+        if numbers_10[i]  in m: number += (i+1)*10
         if numbers_100[i] in m: number += (i+1)*100
     return number
 
