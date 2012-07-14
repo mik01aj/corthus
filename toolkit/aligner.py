@@ -19,7 +19,6 @@ import numpy as np
 from cmath import polar
 import sys
 
-from Alignment import Alignment
 from PairManager import PairManager
 
 matplotlib.use('Agg')
@@ -190,7 +189,26 @@ def align(seq1, seq2, plot_filename=None):
     # total cost: - log(probability of given alignment); not normalized
     # the smaller the better
     print >> sys.stderr, "Total cost: " + str(cost[len(seq1)][len(seq2)])
-    return Alignment(reversed(path))
+    return reversed(path)
+
+
+def iter_pairs(seq):
+    prev = seq[0]
+    for elem in seq[1:]:
+        yield (prev, elem)
+        prev = elem
+
+def make_composed_alignment(seq1, seq2, forced_rungs):
+    forced_rungs = [(0,0)] + forced_rungs + [(len(seq1), len(seq2))]
+    def gen():
+        yield (0, 0, 0.0)
+        for (_fi, _fj), (fi, fj) in iter_pairs(forced_rungs):
+            print >> sys.stderr, "align %d:%d %d:%d" % (_fi+1, fi, _fj+1, fj)
+            part_alignment = align(seq1[_fi+1:fi], seq2[_fj+1:fj])
+            for (i, j, c) in part_alignment:
+                yield (i+_fi+1, j+_fj+1, c)
+            yield (fi, fj, 0.0)
+    return list(gen())
 
 
 # ----------------------------------------------------------------------
@@ -201,6 +219,7 @@ if __name__ == '__main__':
 #              plot_filename='similarity.png')
 
     from Text import Text
+    from Alignment import Alignment
     import re
     import codecs
     import os.path
@@ -221,7 +240,8 @@ if __name__ == '__main__':
                 return [l.strip() for l in f.readlines()]
         else:
             assert filename.endswith('.txt')
-            return list(Text.from_file(filename, lang=lang).as_sentences_flat())
+            text = Text.from_file(filename, lang=lang)
+            return list(text.as_sentences(paragraph_separator=_paragraph_separator))
 
     t1 = read(filename1, lang1)
     t2 = read(filename2, lang2)
@@ -229,8 +249,9 @@ if __name__ == '__main__':
                             '../data/pairs.%s-%s' % (lang1, lang2))
     pair_manager = PairManager.from_file(pairfile)
 
-    a = align(t1, t2,
-              plot_filename='plot.png' if '-plot' in opts else None)
+    a = align(t1, t2, plot_filename='plot.png' if '-plot' in opts else None)
+#    a = make_composed_alignment(t1, t2, [(35, 33)])
+    a = Alignment(a)
 
     if '-text' in opts:
         a.pretty_print(t1, t2)
