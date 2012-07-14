@@ -10,10 +10,12 @@ import sys, os, threading, time, re
 import lucene
 from datetime import datetime
 from toolkit import Text
+from toolkit.translit import metaphone_text
 
 
 def index_files(filenames, storeDir):
-    """Creates a search index from given files, and store it in the `storeDir` folder."""
+    """Creates a search index from given files, and store it in the
+    `storeDir` folder."""
 
     if not os.path.exists(storeDir):
         os.mkdir(storeDir)
@@ -33,12 +35,18 @@ def index_files(filenames, storeDir):
                 doc.add(lucene.Field("filename", filename,
                                      lucene.Field.Store.YES,
                                      lucene.Field.Index.NOT_ANALYZED))
+                doc.add(lucene.Field("lang", lang,
+                                     lucene.Field.Store.YES,
+                                     lucene.Field.Index.NOT_ANALYZED))
                 doc.add(lucene.Field("num", str(paragraph_num),
                                      lucene.Field.Store.YES,
                                      lucene.Field.Index.NOT_ANALYZED))
                 doc.add(lucene.Field("contents", paragraph,
                                      lucene.Field.Store.NO,
                                      lucene.Field.Index.ANALYZED))
+#                doc.add(lucene.Field("metaphone", metaphone_text(paragraph),
+#                                     lucene.Field.Store.NO,
+#                                     lucene.Field.Index.ANALYZED))
                 writer.addDocument(doc)
         except Exception, e:
             print "    Failed to add", filename
@@ -65,7 +73,7 @@ if __name__ == '__main__':
     try:
         [files_dir] = sys.argv[1:]
     except ValueError:
-        print 'Using Lucene', l.VERSION
+        print 'Using Lucene', lucene.VERSION
         print __doc__
         sys.exit(1)
 

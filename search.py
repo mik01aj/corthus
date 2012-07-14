@@ -22,11 +22,6 @@ import sys
 from file_info import get_info
 from toolkit import Text
 
-def search(command):
-    print "Searching for:", command
-    query = _parser.parse(command)
-    return _searcher.search(query, 50).scoreDocs
-
 #def get_result_info(scoreDoc):
 #    doc = _searcher.doc(scoreDoc.doc)
 #    filename = doc.get("path")
@@ -59,17 +54,32 @@ if __name__ == '__main__':
 
     texts = {}
 
-    for scoreDoc in search(query_string):
+    print "Searching for:", query_string
+    query = _parser.parse(query_string)
+
+    for scoreDoc in  _searcher.search(query, 50).scoreDocs:
         #print scoreDoc
         doc = _searcher.doc(scoreDoc.doc)
         filename = doc.get("filename")
         try:
-            t = texts[filename]
+            text = texts[filename]
         except KeyError:
-            t = list(Text.from_file(filename).as_paragraphs())
-            texts[filename] = t
+            text = Text.from_file(filename,
+                                  lang=doc.get("lang"))
+            text = list(text.as_paragraphs())
+            texts[filename] = text
         print "%s : %s" % (filename, doc.get("num"))
-        for line in wrap(t[int(doc.get("num"))]):
+        paragraph_index = int(doc.get("num"))
+        found_paraghaph = text[paragraph_index]
+
+        stream = lucene.TokenSources.getTokenStream("contents", found_paraghaph, _analyzer);
+        scorer = lucene.Scorer(query, "contents", lucene.CachingTokenFilter(stream))
+        highligter = lucene.Highligter(scorer)
+        fragment = highligter.getBestFragment(_analyzer, "contents",
+                                              found_paraghaph)
+        print '>>>' + fragment
+
+        for line in wrap(found_paraghaph):
             print '   ', line
 
 
