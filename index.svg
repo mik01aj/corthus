@@ -14,7 +14,7 @@
    height="768"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.3.1 r9886"
+   inkscape:version="0.48.1 r9760"
    sodipodi:docname="index.svg">
   <defs
      id="defs4">
@@ -88,24 +88,78 @@
          stdDeviation="45.806019"
          id="feGaussianBlur4963-2" />
     </filter>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4776-8"
+       id="radialGradient4810-1"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.64414929,-0.15187905,0.01768624,0.37607259,961.03437,499.65303)"
+       cx="776.95721"
+       cy="331.40121"
+       fx="776.95721"
+       fy="331.40121"
+       r="59.251347" />
+    <linearGradient
+       id="linearGradient4776-8">
+      <stop
+         style="stop-color:#d9d7a7;stop-opacity:1;"
+         offset="0"
+         id="stop4778-8" />
+      <stop
+         style="stop-color:#a49b5b;stop-opacity:1;"
+         offset="1"
+         id="stop4780-8" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4967-0"
+       id="linearGradient4973-6"
+       x1="42.426395"
+       y1="72.206932"
+       x2="42.426395"
+       y2="-73.704002"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(2.8690477,0,0,1.1764706,334.1248,369.20051)" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient4967-0">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop4969-3" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0"
+         offset="1"
+         id="stop4971-6" />
+    </linearGradient>
+    <linearGradient
+       y2="-73.704002"
+       x2="42.426395"
+       y1="72.206932"
+       x1="42.426395"
+       gradientTransform="matrix(2.8690477,0,0,1.6106589,-974.94436,-1433.8755)"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient4114"
+       xlink:href="#linearGradient4967-0"
+       inkscape:collect="always" />
   </defs>
   <sodipodi:namedview
      id="base"
-     pagecolor="#e3e2c8"
+     pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="1"
+     inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="493.16673"
-     inkscape:cy="359.53008"
+     inkscape:zoom="0.5"
+     inkscape:cx="1745.3435"
+     inkscape:cy="287.70428"
      inkscape:document-units="px"
-     inkscape:current-layer="layer8"
+     inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1280"
-     inkscape:window-height="1000"
-     inkscape:window-x="1280"
-     inkscape:window-y="0"
+     inkscape:window-height="939"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
      inkscape:window-maximized="1"
      showguides="false"
      inkscape:guide-bbox="true">
@@ -150,7 +204,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -160,6 +214,15 @@
      id="layer1"
      transform="translate(0,-284.36218)"
      style="display:inline">
+    <rect
+       ry="9.0913725"
+       rx="11.708799"
+       y="285.75119"
+       x="1.3850392"
+       height="768.55042"
+       width="1022.1833"
+       id="rect3795-7-8"
+       style="fill:#e3e2c8;fill-opacity:1;stroke:none;display:inline" />
     <rect
        style="opacity:0.09126982;fill:url(#linearGradient4973);fill-opacity:1;stroke:none"
        id="rect4965"
@@ -279,6 +342,222 @@
        id="path4806"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="sssccccccssssss" />
+    <rect
+       ry="9.0913725"
+       rx="11.708799"
+       y="286.2493"
+       x="1316.5576"
+       height="944.55042"
+       width="1030.1833"
+       id="rect3795-7-8-5"
+       style="fill:#e3e2c8;fill-opacity:1;stroke:none;display:inline" />
+    <rect
+       style="opacity:0.09126982;fill:url(#linearGradient4114);fill-opacity:1;stroke:none;display:inline"
+       id="rect4965-1"
+       width="1022.4764"
+       height="232.33722"
+       x="-1307.655"
+       y="-1549.9119"
+       rx="0"
+       ry="0"
+       transform="matrix(0,-1,-1,0,0,0)" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
+       id="rect3923"
+       width="750.98584"
+       height="881.22601"
+       x="1554.3335"
+       y="323.74939"
+       rx="11.708799"
+       ry="12.380846" />
+    <rect
+       ry="12.380846"
+       rx="11.708799"
+       y="753.08209"
+       x="1350.892"
+       height="70.750832"
+       width="157.10049"
+       id="rect4059"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="1353.2104"
+       y="588.30957"
+       id="text4061"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4063"
+         x="1353.2104"
+         y="588.30957">αααααα</tspan><tspan
+         sodipodi:role="line"
+         x="1353.2104"
+         y="613.30957"
+         id="tspan4065">βββββ</tspan><tspan
+         sodipodi:role="line"
+         x="1353.2104"
+         y="638.30957"
+         id="tspan4067">γγγ</tspan><tspan
+         sodipodi:role="line"
+         x="1353.2104"
+         y="663.30957"
+         id="tspan4069">δδδδδδδδ</tspan><tspan
+         sodipodi:role="line"
+         x="1353.2104"
+         y="688.30957"
+         id="tspan4073">εεεεεε</tspan><tspan
+         sodipodi:role="line"
+         x="1353.2104"
+         y="713.30957"
+         id="tspan4077">ζζζζζζζζζζζ</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
+       id="rect2985-9"
+       width="99.676231"
+       height="44.260288"
+       x="1354.4746"
+       y="498.48105"
+       rx="8.65802"
+       ry="7.0377598" />
+    <text
+       xml:space="preserve"
+       style="font-size:17.56120491px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Bitstream Vera Sans"
+       x="1365.3221"
+       y="528.7478"
+       id="text3860-5"
+       sodipodi:linespacing="125%"
+       transform="scale(1.0019993,0.99800471)"><tspan
+         sodipodi:role="line"
+         id="tspan3862-4"
+         x="1365.3221"
+         y="528.7478">Search...</tspan></text>
+    <rect
+       style="fill:url(#radialGradient4810-1);fill-opacity:1;stroke:none;display:inline"
+       id="rect4808-5"
+       width="46.377922"
+       height="44.260281"
+       x="1460.1899"
+       y="498.48102"
+       rx="6.7513428"
+       ry="7.0377598" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.99999988;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="m 1485.9364,508.27837 c -3.9213,-4.53627 -10.7954,-5.05816 -15.3465,-1.15445 -4.5512,3.9037 -5.0535,10.75273 -1.1322,15.28901 3.1388,3.63087 8.1662,4.68349 12.3809,2.95742 0.098,0.20965 1.5425,-0.79753 1.7012,-0.61409 l 9.7613,11.91033 c 2.3141,-1.89266 0.9162,-0.72751 3.3741,-2.72999 l -10.5311,-11.80079 c -0.1611,-0.18638 1.0891,-1.11099 0.8918,-1.23948 2.3305,-3.89394 2.0357,-8.99121 -1.0995,-12.61796 z m -0.886,0.66619 c 2.8488,3.29255 2.7838,9.54034 -1.2761,13.18588 -3.7006,3.32284 -10.0084,2.53011 -12.844,-0.77378 -3.2872,-3.8302 -3.3221,-9.7583 0.3394,-13.19518 3.7642,-3.53321 10.2979,-3.24217 13.7807,0.78308 z"
+       id="path4806-0"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="sssccccccssssss" />
+    <rect
+       ry="13.038741"
+       rx="11.708799"
+       y="326.70111"
+       x="1352.3131"
+       height="145.37816"
+       width="154.10048"
+       id="rect3971"
+       style="fill:#984e2a;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline" />
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="1361"
+       y="782.36218"
+       id="text4157"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="1361"
+         y="782.36218"
+         id="tspan4161">асдфввефса</tspan><tspan
+         sodipodi:role="line"
+         x="1361"
+         y="807.36218"
+         id="tspan4187">вфсад аверг</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
+       id="rect4163"
+       width="157.10049"
+       height="37.750832"
+       x="1350.892"
+       y="832.08209"
+       rx="11.708799"
+       ry="12.380846" />
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="1362"
+       y="856.36218"
+       id="text4165"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4167"
+         x="1362"
+         y="856.36218">translit_el2pl</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
+       id="rect4169"
+       width="157.10049"
+       height="70.750832"
+       x="1350.892"
+       y="903.08209"
+       rx="11.708799"
+       ry="12.380846" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text4171"
+       y="932.36218"
+       x="1361"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"><tspan
+         y="932.36218"
+         x="1361"
+         id="tspan4173"
+         sodipodi:role="line">αβγςεφσδφ</tspan><tspan
+         id="tspan4175"
+         y="957.36218"
+         x="1361"
+         sodipodi:role="line">ασδφασδφςε</tspan></text>
+    <rect
+       ry="12.380846"
+       rx="11.708799"
+       y="982.08209"
+       x="1350.892"
+       height="37.750832"
+       width="157.10049"
+       id="rect4177"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text4179"
+       y="1006.3622"
+       x="1362"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       xml:space="preserve"><tspan
+         y="1006.3622"
+         x="1362"
+         id="tspan4181"
+         sodipodi:role="line">translit_el2pl</tspan></text>
+    <rect
+       ry="12.380846"
+       rx="11.708799"
+       y="1053.082"
+       x="1350.892"
+       height="70.750832"
+       width="157.10049"
+       id="rect4218"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="1361"
+       y="1082.3622"
+       id="text4220"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="1361"
+         y="1082.3622"
+         id="tspan4224">Polska język</tspan><tspan
+         sodipodi:role="line"
+         x="1361"
+         y="1107.3622"
+         id="tspan4228">trudna sdfwef</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
@@ -384,7 +663,7 @@
      inkscape:groupmode="layer"
      id="layer8"
      inkscape:label="overlay"
-     style="display:inline">
+     style="display:none">
     <rect
        ry="9.0913725"
        rx="11.708799"
@@ -423,7 +702,7 @@
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="2"
-     style="display:inline"
+     style="display:none"
      transform="translate(0,-222)">
     <rect
        ry="9.0913725"
