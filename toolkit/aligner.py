@@ -112,16 +112,18 @@ def plot_flat(fun, rangex, rangey, path=None, filename=None):
 
 def align(seq1, seq2, plot_filename=None):
 
+    len1, len2 = len(seq1), len(seq2)
+
     # cost[i][j] means sum of costs for seq1[0:i] and seq2[0:j]
     # in best possible alignment.
     # This also means -log(probability that sentences 0..i match 0..j).
-    cost = [ [float('inf') for j in range(len(seq2)+1)]
-             for i in range(len(seq1)+1) ]
+    cost = [ [float('inf') for j in range(len2+1)]
+             for i in range(len1+1) ]
     cost[0][0] = 0
 
     # an array to mark where did the best alignment come from
-    prev = [ [None for j in range(len(seq2)+1)]
-             for i in range(len(seq1)+1) ]
+    prev = [ [None for j in range(len2+1)]
+             for i in range(len1+1) ]
 
     fragment_lengths = ((1, 0), (0, 1), # skip a sentence
                         (1, 1),         # match 1-1
@@ -130,13 +132,13 @@ def align(seq1, seq2, plot_filename=None):
                         (1, 3), (3, 1)) # match 3-1
 
     # i, j: sentence numbers
-    for i in xrange(0, len(seq1)+1):
-        print >> sys.stderr, "\ri=%d (%.f%%)" % (i, i*100/(len(seq1)+1)),
+    for i in xrange(0, len1+1):
+        print >> sys.stderr, "\ri=%d (%.f%%)" % (i, i*100/(len1+1)),
         sys.stderr.flush()
-        for j in xrange(0, len(seq2)+1):
+        for j in xrange(0, len2+1):
 
             # skipping some parts of the martix
-            if abs(i/len(seq1) - j/len(seq2)) > 0.3:
+            if len1 * len2 > 100 and abs(i/len1 - j/len2) > 0.3:
                 continue
 
             # Iterating over possible matches.
@@ -172,7 +174,7 @@ def align(seq1, seq2, plot_filename=None):
                     prev[i][j] = (_i, _j)
     print >> sys.stderr, '\rAlingment done'
 
-    assert (i, j) == (len(seq1), len(seq2))
+    assert (i, j) == (len1, len2)
     path = [(i, j, 0.1)]
     while prev[i][j] is not None:
         c = cost[i][j]
@@ -182,13 +184,13 @@ def align(seq1, seq2, plot_filename=None):
 
     if plot_filename:
         plot_flat(lambda x, y: cost[x][y],
-                  len(seq1)+1, len(seq2)+1,
+                  len1+1, len2+1,
                   path,
                   filename=plot_filename)
 
     # total cost: - log(probability of given alignment); not normalized
     # the smaller the better
-    print >> sys.stderr, "Total cost: " + str(cost[len(seq1)][len(seq2)])
+    print >> sys.stderr, "Total cost: " + str(cost[len1][len2])
     return reversed(path)
 
 
@@ -207,7 +209,7 @@ def make_composed_alignment(seq1, seq2, forced_rungs):
             part_alignment = align(seq1[_fi+1:fi], seq2[_fj+1:fj])
             for (i, j, c) in part_alignment:
                 yield (i+_fi+1, j+_fj+1, c)
-            yield (fi, fj, 0.0)
+#            print (fi, fj, 0.0)
     return list(gen())
 
 
@@ -228,20 +230,27 @@ if __name__ == '__main__':
         filename1 = sys.argv[1]
         filename2 = sys.argv[2]
         opts = sys.argv[3:]
-        lang1 = re.match('.*\.([a-z]{2}).(txt|sentences)$', filename1).group(1)
-        lang2 = re.match('.*\.([a-z]{2}).(txt|sentences)$', filename2).group(1)
+        lang1 = re.match('.*\.([a-z]{2})\.[a-z]+$', filename1).group(1)
+        lang2 = re.match('.*\.([a-z]{2})\.[a-z]+$', filename2).group(1)
+        forced_rungs = []
+        for opt in opts:
+            if opt.startswith('-'):
+                continue
+            [i, j] = opt.split(',')
+            forced_rungs.append((int(i), int(j)))
     except (ValueError, AttributeError, IndexError):
         print >> sys.stderr, __doc__
         sys.exit(1)
 
     def read(filename, lang):
-        if filename.endswith('.sentences'):
-            with codecs.open(filename, encoding='utf-8') as f:
-                return [l.strip() for l in f.readlines()]
-        else:
-            assert filename.endswith('.txt')
+        if filename.endswith('.txt'):
+            print >> sys.stderr, "Reading %s as text file" % filename
             text = Text.from_file(filename, lang=lang)
             return list(text.as_sentences(paragraph_separator=_paragraph_separator))
+        else:
+            print >> sys.stderr, "Reading %s as sentence file" % filename
+            with codecs.open(filename, encoding='utf-8') as f:
+                return [l.strip() for l in f.readlines()]
 
     t1 = read(filename1, lang1)
     t2 = read(filename2, lang2)
@@ -249,8 +258,8 @@ if __name__ == '__main__':
                             '../data/pairs.%s-%s' % (lang1, lang2))
     pair_manager = PairManager.from_file(pairfile)
 
-    a = align(t1, t2, plot_filename='plot.png' if '-plot' in opts else None)
-#    a = make_composed_alignment(t1, t2, [(35, 33)])
+#    a = align(t1, t2, plot_filename='plot.png' if '-plot' in opts else None)
+    a = make_composed_alignment(t1, t2, forced_rungs)
     a = Alignment(a)
 
     if '-text' in opts:

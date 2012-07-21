@@ -88,7 +88,7 @@ def split_sentences_pl(text):
             return m.group(1) + split_char + m.group(2)
         else:
             return m.group(0) # no change
-    text = re.sub(r"([\w'=`~\\^-]+[:!]) (\w+)",
+    text = re.sub(r"([\w'=`~\\^-]+[:!?]) (\w+)",
                   split_if_uppercase,
                   text, flags=re.UNICODE)
 

@@ -8,7 +8,8 @@ the command-line.
 Usage:
     ./text_export.py giza <file1> <lang1> <file2> <lang2> \\
                           <alignment-file> <output1> <output2>
-    ./text_export.py hunalign <input-file> <lang> <output-file>
+    ./text_export.py hunalign <input-file> <lang>
+    ./text_export.py sentences <input-file> <lang>
 """
 
 from __future__ import unicode_literals
@@ -41,22 +42,23 @@ def export_for_giza(file1, lang1, file2, lang2, alignment_file,
         for _, s in bisents:
             f.write(s.encode('utf-8') + '\n')
 
-def export_for_hunalign(input_file, lang):
+def export_sentences(input_file, lang, export_type):
     from translit.metaphone import metaphone
     t = Text.from_file(input_file, lang)
     for s in t.as_sentences(paragraph_separator='¶'):
-        if s == '¶':
-            print '<p>'
-        else:
-            s = ' '.join(metaphone(w) for w in s.split())
-            print s
+        if export_type == 'hunalign':
+            if s == '¶':
+                s = '<p>'
+            else:
+                s = ' '.join(metaphone(w) for w in s.split())
+        print s.encode('utf-8')
 
 if __name__ == '__main__':
 
     if sys.argv[1] == 'giza':
         export_for_giza(*sys.argv[1:])
-    elif sys.argv[1] == 'hunalign':
+    elif sys.argv[1] in ['hunalign', 'sentences']:
         (input_file, lang) = sys.argv[2:]
-        export_for_hunalign(input_file, lang)
+        export_sentences(input_file, lang, sys.argv[1])
     else:
         print __doc__

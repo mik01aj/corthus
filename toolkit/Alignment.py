@@ -43,7 +43,8 @@ class Alignment:
         previous_row = [0 for i in range(N)]
         for row in data:
             assert len(row) == N+1
-            assert all(row[i] >= previous_row[i] for i in range(N))
+            assert all(row[i] >= previous_row[i] for i in range(N)), \
+                (previous_row, row)
             previous_row = row
         if add_zeros:
             data = (tuple(0 for i in range(N+1)), ) + data # first cost=0
@@ -119,6 +120,8 @@ class Alignment:
     def evaluate(self, golden):
         """Return precision and recall from comparison of two alignments.
         """
+        #TODO: 1. a,x b,x b,y == a,x a,y b,y
+        #      2. a,x a,y a,z == a,x a,z
         intersection = set(row[:-1] for row in self.data) & \
                        set(row[:-1] for row in golden)
         precision = len(intersection) / len(self.data)
@@ -157,13 +160,22 @@ if __name__ == '__main__':
     import re
     from Text import Text
 
-    [alignment_filename] = sys.argv[1:]
-
-    m = re.match(r'(.*)\.(..)-(..)\.(.*)$', alignment_filename)
+    alignment_filename = sys.argv[1]
     a = Alignment.from_file(alignment_filename)
-    t1 = Text.from_file("%s.%s.txt" % (m.group(1), m.group(2)), lang=m.group(2))
-    t2 = Text.from_file("%s.%s.txt" % (m.group(1), m.group(3)), lang=m.group(3))
-    a.pretty_print(t1.as_sentences_flat(),
-                   t2.as_sentences_flat())
+    if sys.argv[2:]:
+        [fn1, fn2] = sys.argv[2:]
+        with open(fn1) as f:
+            seq1 = [l.decode('utf-8').strip() for l in f.readlines()]
+        with open(fn2) as f:
+            seq2 = [l.decode('utf-8').strip() for l in f.readlines()]
+    else:
+        m = re.match(r'(.*)\.(..)-(..)\.(.*)$', alignment_filename)
+        t1 = Text.from_file("%s.%s.txt" % (m.group(1), m.group(2)),
+                            lang=m.group(2))
+        t2 = Text.from_file("%s.%s.txt" % (m.group(1), m.group(3)),
+                            lang=m.group(3))
+        seq1 = t1.as_sentences_flat()
+        seq2 = t2.as_sentences_flat()
+    a.pretty_print(seq1, seq2)
     print "Total cost: " + str(sum(c for (_, _, c) in a.data))
 

@@ -60,6 +60,9 @@ align3: $(shell ./get_make_targets.py 3 .3)
 clean-3:
 	find texts/ -name '*.??-??-??.3' -delete; \
 
+test:
+#	$(HUNALIGN) /dev/null test_data/kanon_izr.pl.metaphone test_data/kanon_izr.cu.metaphone -realign > test_data/kanon_izr.pl-cu.hunalign
+	./toolkit/aligner.py test_data/kanon_izr.pl.metaphone test_data/kanon_izr.cu.metaphone > test_data/kanon_izr.pl-cu.my
+	diff test_data/kanon_izr.pl-cu.golden test_data/kanon_izr.pl-cu.my
 
-
-.PHONY: clean-hunalign clean-my clean-sentences clean-3
+.PHONY: clean-hunalign clean-my clean-sentences clean-3 test

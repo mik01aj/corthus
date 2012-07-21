@@ -1,11 +1,11 @@
 *.pyc
 .#*
-*.hunalign
-*.sentences
-*.log
+texts/*.hunalign
+texts/*.my
+texts/*.sentences
+texts/*.log
 *.png
 installation_notes
 index/
-*.my
 translate.txt
 
