@@ -3,10 +3,10 @@
 
 """
 Script that simplifies makes Greek text to use only one accent type
-(tonos ´), and removes all diacritics, except for dialytika (¨).
+(tonos ´), and removes all other diacritics, except for dialytika (¨).
 
 Output alphabet: αά β γ δ εέ ζ ηή θ ιίϊΐ κ λ μ ν ξ οό π ρ σς τ υύϋΰ φ χ ψ ωώ
-Interpunction:   ΄·.:;
+Interpunction:   '·.:;
 (not guaranteed)
 
 Usage: ./simplify_el.py <file>  (to use text file as input)
@@ -18,9 +18,15 @@ from __future__ import unicode_literals
 import sys
 import unicodedata
 
+from expand_cu import multi_replace
+
 #
 # output_charset = "ςεέρτυύθιίϊοόπαάσδφγηήξκλζχψωώβνμ"
 #
+
+number_pairs = zip(["α'", "β'", "γ'", "δ'", "ε'", "στ'", "ζ'", "θ'"],
+                   [str(i) for i in range(1, 10)])
+convert_numbers = multi_replace(number_pairs)
 
 def simplify_el(string):
     result = []
@@ -46,11 +52,14 @@ def simplify_el(string):
                 new_name += ['AND', d]
             result.append(unicodedata.lookup(' '.join(new_name)))
         else:
+            # oxia, tonos, acute, RIGHT SINGLE QUOTATION MARK (they look the same)
+            if c in ('´', '΄', '´', '’'):
+                c = "'"
             result.append(c)
-    return ''.join(result)
-
-
-#TODO: convert Greek numbers, α' β' γ' δ' ε' στ' ζ' θ' - also with ’
+    result = ''.join(result)
+    result = ' '.join(convert_numbers(word)
+                      for word in result.split())
+    return result
 
 
 if __name__ == '__main__':

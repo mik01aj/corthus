@@ -59,6 +59,11 @@ class Alignment:
                 data.append([int(x) for x in row[:-1]] + [float(row[-1])])
         return Alignment(data, *args, **kwargs)
 
+    @classmethod
+    def create_straight(cls, rows, cols):
+        return Alignment([(i,) * cols for i in range(rows)],
+                         no_costs=True)
+
     def dump(self, file_path):
         with open(file_path, 'w') as f:
             writer = csv.writer(f, dialect='excel-tab')
@@ -133,7 +138,7 @@ class Alignment:
         from textwrap import wrap
         from itertools import izip_longest
         if len(sequences) != self.N:
-            raise ValueError
+            raise ValueError, (len(sequences), self.N)
         # ₀₁₂₃₄₅₆₇₈₉ ⁰¹²³⁴⁵⁶⁷⁸⁹ 𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡
         for row in list(self.as_ranges(with_costs=True)):
             lines = [] # will be a list of lists
@@ -149,7 +154,8 @@ class Alignment:
                 for i in range(self.N+1):
                     if output_row[i] == None:
                         output_row[i] = ""
-                s = "|".join("%-35s " % col for col in output_row[:-1])
+                s = "|".join("%-35s%s " % (col, ' '*col.count('\u0331'))
+                             for col in output_row[:-1])
                 s += " |" + output_row[-1]
                 print s.encode('utf-8') # a workaround for `less`
             print
@@ -178,4 +184,3 @@ if __name__ == '__main__':
         seq2 = t2.as_sentences_flat()
     a.pretty_print(seq1, seq2)
     print "Total cost: " + str(sum(c for (_, _, c) in a.data))
-

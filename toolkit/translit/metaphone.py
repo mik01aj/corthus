@@ -22,7 +22,7 @@ WARNINGS_ENABLED = True # changed also by metaphone function
 
 metaphone_charset = "aeiou-#?bcdfhjkl7mnprstvz2"
 
-ignored_chars = ".,:;!?@΄᾽῞∙··()[]{}<>«»„”\"–*…\xad" # \xad - soft hyphen
+ignored_chars = ".,:;!?@΄´᾽῞∙··()[]{}<>«»„”\"–*…\xad" # \xad - soft hyphen
 ignored_chars_regex = re.compile("["+re.escape(ignored_chars)+"]", re.UNICODE)
 
 pairs_pl = [
@@ -114,7 +114,10 @@ pairs_el = [
     ("ώ",   "ω"),
     ("ύ",   "υ"),
     ("ΰ",   "ϋ"),
-    ("αι",  "e"),  # ai
+    ("αι",  "e"),  # αι
+    ("μπ",  "b"),  # μπ
+    ("τσ",  "c"),  # τσ
+    ("τς",  "c"),  # τς
     ("α",   "a"),  # alphabet
     ("β",   "v"),
     ("γ",   "h"),
@@ -180,6 +183,9 @@ def metaphone_cu(word):
 
 def metaphone_el(word):
     word = simplify_el(word)
+    m = re.match('[^\w]*([0-9]+)[^\w]*', word)
+    if m:
+        return "#" + m.group(1)
     if any(word.endswith(suffix) for suffix in ['εν', 'ον']):
         word = word[:-1]
     return metaphone_generic(pairs_el, word, 'el')
@@ -215,9 +221,6 @@ def metaphone(word, lang=None):
             WARNINGS_ENABLED = True
 
 def detect_language(text):
-    """The only diference between this function and single-word `metaphone`:
-    language detection is done only once (so not on per-word basis)
-    """
     for c in text: # assuming text is lowercase
         try:
             if c in "żółćęśąźńz":
@@ -233,9 +236,14 @@ def detect_language(text):
     return None
 
 
-def metaphone_text(text):
+def metaphone_text(text, lang=None):
+    """The only diference between this function and single-word
+    `metaphone`: language detection is done only once (so not on
+    per-word basis). Returns a list of keys.
+    """
     text = text.lower()
-    lang = detect_language(text)
+    if not lang:
+        lang = detect_language(text)
     return [metaphone(word, lang) for word in text.split()]
 
 #def test():
