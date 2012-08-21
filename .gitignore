@@ -13,3 +13,7 @@ texts/*/*.sentences
 installation_notes
 index/
 translate.txt
+*.aux
+*.bbl
+*.toc
+*.blg
