@@ -17,7 +17,7 @@ from collections import defaultdict
 def read_all_pairs(filename):
     """Iterates over sentence pairs in a file.
     """
-    m = re.match('(.*)\.(\w\w)-(\w\w).\w+$', filename)
+    m = re.match('(.*)/(\w\w)-(\w\w).\w+$', filename)
     assert m
     basename = m.group(1)
     lang1 = m.group(2)
@@ -26,8 +26,8 @@ def read_all_pairs(filename):
         alignment = Alignment.from_file(filename)
     except ValueError:
         return
-    t1 = Text.from_file(basename + '.' + lang1 + '.txt', lang1)
-    t2 = Text.from_file(basename + '.' + lang2 + '.txt', lang2)
+    t1 = Text.from_file(basename + '/' + lang1 + '.txt', lang1)
+    t2 = Text.from_file(basename + '/' + lang2 + '.txt', lang2)
     seq1 = t1.as_sentences_flat()
     seq2 = t2.as_sentences_flat()
 #    print "%s text: %d sentences" % (lang1, len(seq1))

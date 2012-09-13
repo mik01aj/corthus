@@ -61,4 +61,5 @@ if __name__ == '__main__':
         (input_file, lang) = sys.argv[2:]
         export_sentences(input_file, lang, sys.argv[1])
     else:
-        print __doc__
+        print >> sys.stderr, __doc__
+        exit(1)

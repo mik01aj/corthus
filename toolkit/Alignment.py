@@ -7,6 +7,12 @@ multi-language (2 or more) alignments.
 
 You can also run this file from the command line to pretty-print an
 alignment.
+
+Usage examples:
+    ./Alignment.py alignment.pl-cu.hunalign
+         (the script will find the txt files)
+    ./Alignment.py alignment.pl-cu.hunalign a.sentences b.sentences
+         (the script will use given files as sentence files)
 """
 
 from __future__ import unicode_literals
@@ -38,7 +44,6 @@ class Alignment:
             for i in xrange(len(data)):
                 data[i] = tuple(data[i]) + (0, )
         N = len(data[0]) - 1
-        assert N >= 2
         assert data[0][-1]*0 + 1
         previous_row = [0 for i in range(N)]
         for row in data:
@@ -57,6 +62,8 @@ class Alignment:
         with open(file_path) as f:
             for row in csv.reader(f, dialect='excel-tab'):
                 data.append([int(x) for x in row[:-1]] + [float(row[-1])])
+        if not data:
+            raise IOError, data
         return Alignment(data, *args, **kwargs)
 
     @classmethod
@@ -166,21 +173,28 @@ if __name__ == '__main__':
     import re
     from Text import Text
 
-    alignment_filename = sys.argv[1]
-    a = Alignment.from_file(alignment_filename)
-    if sys.argv[2:]:
-        [fn1, fn2] = sys.argv[2:]
-        with open(fn1) as f:
-            seq1 = [l.decode('utf-8').strip() for l in f.readlines()]
-        with open(fn2) as f:
-            seq2 = [l.decode('utf-8').strip() for l in f.readlines()]
-    else:
-        m = re.match(r'(.*)\.(..)-(..)\.(.*)$', alignment_filename)
-        t1 = Text.from_file("%s.%s.txt" % (m.group(1), m.group(2)),
-                            lang=m.group(2))
-        t2 = Text.from_file("%s.%s.txt" % (m.group(1), m.group(3)),
-                            lang=m.group(3))
-        seq1 = t1.as_sentences_flat()
-        seq2 = t2.as_sentences_flat()
-    a.pretty_print(seq1, seq2)
-    print "Total cost: " + str(sum(c for (_, _, c) in a.data))
+    try:
+        alignment_filename = sys.argv[1]
+        if sys.argv[2:]:
+            [fn1, fn2] = sys.argv[2:]
+            assert not fn1.endswith('.txt')
+            assert not fn2.endswith('.txt')
+            with open(fn1) as f:
+                seq1 = [l.decode('utf-8').strip() for l in f.readlines()]
+                with open(fn2) as f:
+                    seq2 = [l.decode('utf-8').strip() for l in f.readlines()]
+        else:
+            m = re.match(r'(.*/)?(..)-(..)\.(.*)$', alignment_filename)
+            t1 = Text.from_file("%s%s.txt" % (m.group(1), m.group(2)),
+                                lang=m.group(2))
+            t2 = Text.from_file("%s%s.txt" % (m.group(1), m.group(3)),
+                                lang=m.group(3))
+            seq1 = t1.as_sentences_flat()
+            seq2 = t2.as_sentences_flat()
+        a = Alignment.from_file(alignment_filename)
+        a.pretty_print(seq1, seq2)
+        print "Total cost: " + str(sum(c for (_, _, c) in a.data))
+    except IndexError, ValueError:
+        print >> sys.stderr, __doc__
+    except IOError, e:
+        print >> sys.stderr, e

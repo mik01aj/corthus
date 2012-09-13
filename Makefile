@@ -1,6 +1,7 @@
 
 SHELL := /bin/bash
-H := $(shell if [ -f ./external/hilite ]; then echo ./external/hilite; fi)
+#H := $(shell if [ -f ./external/hilite ]; then echo ./external/hilite; fi)
+H :=
 
 all: sentences hunalign pairs my
 
@@ -10,21 +11,21 @@ all: sentences hunalign pairs my
 HUNALIGN='./external/hunalign-1.1/src/hunalign/hunalign'
 
 sentences: $(shell ./get_make_targets.py 1 .sentences)
-%.pl.sentences: %.pl.txt toolkit/sentence_splitter.py toolkit/text_export.py
-	$(H) ./toolkit/text_export.py sentences$< pl > $@
-%.cu.sentences: %.cu.txt toolkit/sentence_splitter.py toolkit/text_export.py
-	$(H) ./toolkit/text_export.py sentences$< cu > $@
-%.el.sentences: %.el.txt toolkit/sentence_splitter.py toolkit/text_export.py
-	$(H) ./toolkit/text_export.py sentences$< el > $@
+%/pl.sentences: %/pl.txt toolkit/sentence_splitter.py toolkit/text_export.py
+	$(H) ./toolkit/text_export.py sentences $< pl > $@
+%/cu.sentences: %/cu.txt toolkit/sentence_splitter.py toolkit/text_export.py
+	$(H) ./toolkit/text_export.py sentences $< cu > $@
+%/el.sentences: %/el.txt toolkit/sentence_splitter.py toolkit/text_export.py
+	$(H) ./toolkit/text_export.py sentences $< el > $@
 clean-sentences:
 	find texts/ -name '*.??.sentences' -delete
 
 huninput: $(shell ./get_make_targets.py 1 .huninput)
-%.pl.huninput: %.pl.txt toolkit/sentence_splitter.py toolkit/text_export.py
+%/pl.huninput: %/pl.txt toolkit/sentence_splitter.py toolkit/text_export.py
 	$(H) ./toolkit/text_export.py hunalign $< pl > $@
-%.cu.huninput: %.cu.txt toolkit/sentence_splitter.py toolkit/text_export.py
+%/cu.huninput: %/cu.txt toolkit/sentence_splitter.py toolkit/text_export.py
 	$(H) ./toolkit/text_export.py hunalign $< cu > $@
-%.el.huninput: %.el.txt toolkit/sentence_splitter.py toolkit/text_export.py
+%/el.huninput: %/el.txt toolkit/sentence_splitter.py toolkit/text_export.py
 	$(H) ./toolkit/text_export.py hunalign $< el > $@
 clean-huninput:
 	find texts/ -name '*.??.huninput' -delete
@@ -32,13 +33,13 @@ clean-huninput:
 hunalign: $(shell ./get_make_targets.py 2 .hunalign)
 # NOTE: when translate.txt is not there, it means a Hunalign error.
 # hunalign will not fail in this case, however rm will do.
-%.pl-cu.hunalign: %.pl.huninput %.cu.huninput
+%/pl-cu.hunalign: %/pl.huninput %/cu.huninput
 	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> >(tee "/tmp/$(shell echo $@.log | sed -e 's#/#_#g')" | grep Quality >&2)
 #	rm translate.txt || rm $@ && cat /tmp/$(shell echo $@.log | sed -e 's#/#_#g') && false
-%.cu-el.hunalign: %.cu.huninput %.el.huninput
+%/cu-el.hunalign: %/cu.huninput %/el.huninput
 	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> >(tee "/tmp/$(shell echo $@.log | sed -e 's#/#_#g')" | grep Quality >&2)
 #	rm translate.txt || rm $@ && cat /tmp/$(shell echo $@.log | sed -e 's#/#_#g') && false
-%.pl-el.hunalign: %.pl.huninput %.el.huninput
+%/pl-el.hunalign: %/pl.huninput %/el.huninput
 	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> >(tee "/tmp/$(shell echo $@.log | sed -e 's#/#_#g')" | grep Quality >&2)
 #	rm translate.txt || rm $@ && cat /tmp/$(shell echo $@.log | sed -e 's#/#_#g') && false
 clean-hunalign:
@@ -56,12 +57,12 @@ data/pairs.pl-el: alignment_analysis.py
 	./alignment_analysis.py `find texts/ -name '*.pl-el.hunalign'` > $@
 
 my: $(shell ./get_make_targets.py 2 .my)
-%.pl-cu.my: %.pl.huninput %.cu.huninput
-	./aligner.py $^ > $@
-%.cu-el.my: %.cu.huninput %.el.huninput
-	./aligner.py $^ > $@
-%.pl-el.my: %.pl.huninput %.el.huninput
-	./aligner.py $^ > $@
+%/pl-cu.my: %/pl.huninput %/cu.huninput
+	./toolkit/aligner.py $^ > $@
+%/cu-el.my: %/cu.huninput %/el.huninput
+	./toolkit/aligner.py $^ > $@
+%/pl-el.my: %/pl.huninput %/el.huninput
+	./toolkit/aligner.py $^ > $@
 clean-my:
 	find texts/ -name '*.??-??.my' -delete
 

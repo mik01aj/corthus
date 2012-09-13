@@ -21,9 +21,6 @@ def split_sentences(text, lang):
         return split_sentences_el(text)
     else:
         return split_sentences_pl(text)
-        #TODO write something that will work without nltk
-#        import nltk
-#        return nltk.sent_tokenize(text)
 
 
 def split_sentences_cu(text):
@@ -121,3 +118,5 @@ def split_sentences_el(text):
     if sent:
         yield ' '.join(sent)
 
+if __name__ == '__main__':
+    print __doc__

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import codecs
 import textwrap
 from sentence_splitter import split_sentences
@@ -65,7 +67,7 @@ class Text(object):
         return list(gen())
 
     def as_sentences_flat(self):
-        return self.as_sentences(paragraph_separator=u'¶')
+        return self.as_sentences(paragraph_separator='¶')
 
     def as_sentences_nested(self):
         return [ split_sentences(p, self.lang)

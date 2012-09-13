@@ -166,8 +166,9 @@ def metaphone_generic(pairs, word, lang='<?>'):
     for c in word:
         if c not in metaphone_charset:
             if WARNINGS_ENABLED:
-                print >> sys.stderr, ("invalid char here: %s → %s (lang: %s)"
-                                      % (original_word, word, lang)).encode('utf-8')
+                w = ("metaphone: invalid char %s in word: %s (key would be %s; lang: %s)"
+                     % (c, original_word, word, lang))
+                print >> sys.stderr, w.encode('utf-8')
             return '?'
     return word[:6] # cutting to 6 chars
 
@@ -195,6 +196,8 @@ def metaphone(word, lang=None):
     word = ignored_chars_regex.sub("", word)
     if not word:
         return '-'
+    if word == '¶':
+        return '¶'
     m = re.match('[^\w]*([0-9]+)[^\w]*', word)
     if m:
         return "#" + m.group(1) # a number
@@ -223,28 +226,31 @@ def metaphone(word, lang=None):
 def detect_language(text):
     for c in text: # assuming text is lowercase
         try:
-            if c in "żółćęśąźńz":
-                # (z doesn't occur in Church-slavonic and is very rare in English)
+            if c in "żółćęśąźń":
                 return 'pl'
             name = unicodedata.name(c).split()
-            if name[0] == 'CYRILLIC' or c in "~^=": # XXX = is also in titles
+            if name[0] == 'CYRILLIC' or c in "~^":
                 return 'cu'
             if name[0] == 'GREEK':
                 return 'el'
         except ValueError:
             pass
+    for c in text:
+        if unicodedata.name(c).split()[0] == 'LATIN':
+            return 'pl'
     return None
 
 
 def metaphone_text(text, lang=None):
     """The only diference between this function and single-word
     `metaphone`: language detection is done only once (so not on
-    per-word basis). Returns a list of keys.
+    per-word basis). Returns a string.
     """
     text = text.lower()
     if not lang:
         lang = detect_language(text)
-    return [metaphone(word, lang) for word in text.split()]
+    #TODO some smarter word splitting
+    return ' '.join(metaphone(word, lang) for word in text.split())
 
 #def test():
 #    cu_examples = [("прилjь'жнw",     "prile2no"),

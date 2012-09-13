@@ -35,10 +35,10 @@ if __name__ == '__main__':
 
     while files:
         filename = files.pop()
-        m = re.match('(.+)\.([a-z]{2}).txt', filename)
+        m = re.match('(.+)/([a-z]{2}).txt', filename)
         if m:
             basename = m.group(1)
-            lang = m.group(2)
+            lang = m.group(1)
             grouped[basename] = grouped.get(basename, []) + [lang]
             if parity == 1:
                 print basename + '.' + lang + suffix

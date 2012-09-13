@@ -18,7 +18,7 @@ def get_info(filename):
 
     try:
         # alignment
-        m = re.match('(.*)\.(\w\w)-(\w\w).(\w+)$', filename)
+        m = re.match('(.*)/(\w\w)-(\w\w).(\w+)$', filename)
         if m:
             from toolkit import Alignment
             a = Alignment.from_file(filename)
@@ -26,14 +26,14 @@ def get_info(filename):
                      'basename' : m.group(1),
                      'lang1' : m.group(2),
                      'lang2' : m.group(3),
-                     'text1' : "%s.%s.txt" % (m.group(1), m.group(2)),
-                     'text2' : "%s.%s.txt" % (m.group(1), m.group(3)),
+                     'text1' : "%s/%s.txt" % (m.group(1), m.group(2)),
+                     'text2' : "%s/%s.txt" % (m.group(1), m.group(3)),
                      'backend' : m.group(4),
                      'cost' : a.summed_cost(),
                      'length' : len(a.data)}
 
         # text file
-        m = re.match('(.*)\.(\w\w).txt+$', filename)
+        m = re.match('(.*)/(\w\w).txt+$', filename)
         if m:
             from toolkit import Text
             t = Text.from_file(filename)
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         grouped = {}
         while filenames:
             filename = filenames.pop()
-            m = re.match('(.+)\.([a-z]{2}-[a-z]{2}\..*)', filename)
+            m = re.match('(.+)/([a-z]{2}-[a-z]{2}\..*)', filename)
             if m:
                 basename = m.group(1)
                 suffix = m.group(2)

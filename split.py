@@ -19,7 +19,7 @@ import subprocess
 def split(filenames):
     processed_files = []
     for fn in filenames:
-        m = re.match('(.*)\.([a-z]{2})\.txt$', fn)
+        m = re.match('(.*)/([a-z]{2})\.txt$', fn)
         if not m:
             continue
 

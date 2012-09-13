@@ -1,13 +1,13 @@
 *.pyc
 .#*
-texts/*.hunalign
-texts/*/*.hunalign
-texts/*.huninput
-texts/*/*.huninput
+*.hunalign
+*.huninput
 texts/*.my
 texts/*/*.my
+texts/*/*/*.my
 texts/*.sentences
 texts/*/*.sentences
+texts/*/*/*.sentences
 *.log
 *.png
 installation_notes

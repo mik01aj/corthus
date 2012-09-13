@@ -9,6 +9,8 @@ Usage: ./aligner.py text.lang1.txt       text.lang2.txt       [options]
 Options are:
     -text   writes the alignment as pretty-printed text
     -plot   plots the cost table to plot.png
+    <i>,<j> forces sentences i in lang1 and j in lang2 to be aligned with
+            each other. This is useful for correcting alignments by hand.
 """
 
 from __future__ import division
@@ -138,7 +140,7 @@ def align(seq1, seq2, plot_filename=None):
         for j in xrange(0, len2+1):
 
             # skipping some parts of the martix
-            if len1 * len2 > 100 and abs(i/len1 - j/len2) > 0.3:
+            if len1 * len2 > 100 and abs(i/len1 - j/len2) > 0.4:
                 continue
 
             # Iterating over possible matches.
@@ -230,8 +232,8 @@ if __name__ == '__main__':
         filename1 = sys.argv[1]
         filename2 = sys.argv[2]
         opts = sys.argv[3:]
-        lang1 = re.match('.*\.([a-z]{2})\.[a-z]+$', filename1).group(1)
-        lang2 = re.match('.*\.([a-z]{2})\.[a-z]+$', filename2).group(1)
+        lang1 = re.match('.*/([a-z]{2})\.[a-z]+$', filename1).group(1)
+        lang2 = re.match('.*/([a-z]{2})\.[a-z]+$', filename2).group(1)
         forced_rungs = []
         for opt in opts:
             if opt.startswith('-'):
