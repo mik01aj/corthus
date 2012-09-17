@@ -42,7 +42,13 @@ $(document).ready(
                set_selection(langs[i], selected_num, false);
                set_selection(langs[i], selected_num, true, 'selected2');
             }
-            textarea.value += rung_str + "\n";
+            textarea.value += rung_str;
+
+            /* sorting rows */
+            var sortfun = function(x, y) { return parseInt(x)-parseInt(y); };
+            textarea.value = textarea.value.split('\n').sort(sortfun).join('\n');
+            
+            textarea.value += '\n';
          });
 
       /* console.log("Hello"); */

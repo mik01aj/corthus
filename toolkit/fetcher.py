@@ -3,7 +3,7 @@
 
 """
 Usage:
-    ./fetcher.py text langs
+    ./fetcher.py text langs [backend]
 """
 
 import sys
@@ -59,7 +59,7 @@ def fetch_alignment(basename, langs, backend='hunalign'):
             a = Alignment.from_file("%s/%s-%s.%s" %
                                     (basename, real_langs[0], real_langs[1], backend))
 
-    else: # 3 :(
+    else: # len(real_langs) == 3 :(
         a1 = Alignment.from_file('%s/pl-cu.%s' % (basename, backend)).as_ladder()
         a2 = Alignment.from_file('%s/cu-el.%s' % (basename, backend)).as_ladder()
         a3 = Alignment.from_file('%s/pl-el.%s' % (basename, backend)).as_ladder()

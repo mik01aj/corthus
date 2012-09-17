@@ -113,7 +113,7 @@ table.toc tr:hover { background-color: #ffa; }
 #nav #options img { position: absolute; right: 0; top: 0;
                     visibility: hidden; }
 
-#nav #correction textarea { width: 100%; height: 5em; }
+#nav #correction textarea { width: 100%; height: 15em; }
 
 #content { position: absolute;
            left: 17em; top: 1em; right: 1em;

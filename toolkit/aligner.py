@@ -174,7 +174,6 @@ def align(seq1, seq2, plot_filename=None):
                     #print >> sys.stderr, _i, i, _j, j
                     cost[i][j] = new_cost
                     prev[i][j] = (_i, _j)
-    print >> sys.stderr, '\rAlingment done'
 
     assert (i, j) == (len1, len2)
     path = [(i, j, 0.1)]
@@ -192,7 +191,7 @@ def align(seq1, seq2, plot_filename=None):
 
     # total cost: - log(probability of given alignment); not normalized
     # the smaller the better
-    print >> sys.stderr, "Total cost: " + str(cost[len1][len2])
+    print >> sys.stderr, "\rAlingment done. Total cost: " + str(cost[len1][len2])
     return reversed(path)
 
 
@@ -207,7 +206,8 @@ def make_composed_alignment(seq1, seq2, forced_rungs):
     def gen():
         yield (0, 0, 0.0)
         for (_fi, _fj), (fi, fj) in iter_pairs(forced_rungs):
-            print >> sys.stderr, "align %d:%d %d:%d" % (_fi+1, fi, _fj+1, fj)
+            print >> sys.stderr, "Aligning %d:%d--%d:%d (%d--%d sents)..." % \
+                (_fi+1, fi, _fj+1, fj, fi-_fi-1, fj-_fj-1)
             part_alignment = align(seq1[_fi+1:fi], seq2[_fj+1:fj])
             for (i, j, c) in part_alignment:
                 yield (i+_fi+1, j+_fj+1, c)
@@ -227,45 +227,57 @@ if __name__ == '__main__':
     import re
     import codecs
     import os.path
+    import argparse
 
-    try:
-        filename1 = sys.argv[1]
-        filename2 = sys.argv[2]
-        opts = sys.argv[3:]
-        lang1 = re.match('.*/([a-z]{2})\.[a-z]+$', filename1).group(1)
-        lang2 = re.match('.*/([a-z]{2})\.[a-z]+$', filename2).group(1)
-        forced_rungs = []
-        for opt in opts:
-            if opt.startswith('-'):
-                continue
-            [i, j] = opt.split(',')
-            forced_rungs.append((int(i), int(j)))
-    except (ValueError, AttributeError, IndexError):
-        print >> sys.stderr, __doc__
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('folder',
+                        help='text folder')
+    parser.add_argument('lang1')
+    parser.add_argument('lang2')
+    parser.add_argument('--plot', action="store_true", default=False,
+                        help='plots the cost table to plot.png')
+    parser.add_argument('--text', action="store_true", default=False,
+                        help='shows the alignment as pretty-printed text')
+    parser.add_argument('--hand', action="store_true", default=None,
+                        help='use file with hand-aligned sentence pairs')
+
+    args = parser.parse_args()
+    if args.folder.endswith('/'):
+        args.folder = args.folder[:-1]
+    for k, v in vars(args).items():
+        print '%10s = %s' % (k, v)
+    print
+
+    forced_rungs = []
+    if args.hand:
+        with open('%s/%s-%s.hand' % (args.folder, args.lang1, args.lang2)) as f:
+            for line in f:
+                i, j = line.split()
+                forced_rungs.append((int(i), int(j)))
+        print >> sys.stderr, "%d hand-aligned pairs found." % len(forced_rungs)
 
     def read(filename, lang):
-        if filename.endswith('.txt'):
-            print >> sys.stderr, "Reading %s as text file" % filename
-            text = Text.from_file(filename, lang=lang)
-            return list(text.as_sentences(paragraph_separator=_paragraph_separator))
-        else:
-            print >> sys.stderr, "Reading %s as sentence file" % filename
-            with codecs.open(filename, encoding='utf-8') as f:
-                return [l.strip() for l in f.readlines()]
+        with codecs.open(filename, encoding='utf-8') as f:
+            return [l.strip() for l in f.readlines()]
 
-    t1 = read(filename1, lang1)
-    t2 = read(filename2, lang2)
+    filename1 = args.folder + '/' + args.lang1 + '.sentences'
+    filename2 = args.folder + '/' + args.lang2 + '.sentences'
+    t1 = read(filename1, args.lang1)
+    t2 = read(filename2, args.lang2)
+
     pairfile = os.path.join(os.path.dirname(__file__),
-                            '../data/pairs.%s-%s' % (lang1, lang2))
+                            '../data/pairs.%s-%s' % (args.lang1, args.lang2))
     pair_manager = PairManager.from_file(pairfile)
 
 #    a = align(t1, t2, plot_filename='plot.png' if '-plot' in opts else None)
     a = make_composed_alignment(t1, t2, forced_rungs)
     a = Alignment(a)
 
-    if '-text' in opts:
-        a.pretty_print(t1, t2)
-    else:
+    output_filename = '%s/%s-%s.my' % (args.folder, args.lang1, args.lang2)
+    with open(output_filename, 'w') as f:
         for i, j, c in a.data:
-            print "%d\t%d\t%.2f" % (i, j, c)
+            f.write("%d\t%d\t%.2f\n" % (i, j, c))
+    print >> sys.stderr, "Wrote alignment to %s." % output_filename
+
+    if args.text:
+        a.pretty_print(t1, t2)

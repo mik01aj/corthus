@@ -43,11 +43,14 @@ def text(request, basename, langs):
         all_ranges = alignment.as_ranges(with_costs=False)
         for rung_num, rung_ranges in enumerate(all_ranges):
             assert len(rung_ranges) == len(seqs)
-            # if all parallel texts have ¶, we can finish the cell
-            all_break = all(s >= len(seq) or seq[s] == '¶'
+
+            # finishing the cell (if ¶ everywhere or similar situation)
+            all_break = all(s >= len(seq) or s==e
+                            or seq[s] == '¶' or seq[s-1] == '¶'
                             for (seq, (s, e)) in zip(seqs, rung_ranges))
             if (all_break or rung_num == len(all_ranges)-1) and table_row:
-                yield table_row
+                if any(cell['sentences'] for cell in table_row):
+                    yield table_row
                 table_row = None
 
             # starting new table_row
@@ -73,7 +76,6 @@ def text(request, basename, langs):
                           'num' : sent_num })
 
         yield table_row
-#        assert not table_row, "table_row should be empty on finish"
 
     # getting navigation links
     other_basenames = set()
@@ -129,6 +131,13 @@ def text(request, basename, langs):
 
     info = 'Using backend: ' + backend
 
+    # getting corrections
+    try:
+        with open(TEXTS_ROOT + '/' + basename + '/' + '-'.join(langs) + '.hand') as f:
+            corrections = f.read()
+    except IOError:
+        corrections = ''
+
     template = loader.get_template('text.html')
     context = RequestContext(request,
                              { 'title' : os.path.basename(basename),
@@ -138,13 +147,20 @@ def text(request, basename, langs):
                                'table' : table,
                                'col_width' : 100/len(langs),
                                'navigation_links' : navigation_links,
+                               'corrections' : corrections,
                                'request' : request })
     return HttpResponse(template.render(context))
 
 
 def correct(request, basename, langs):
-    #TODO some security, checking regex for each line
-    print request.POST['corrections']
+    data = request.POST['corrections']
+    for line in data.splitlines():
+        if not re.match('\d+\t\d+\t?$', line):
+            print line
+            return HttpResponse('invalid data :(', status=500)
+    # TODO some more data checking
+    with open(TEXTS_ROOT + '/' + basename + '/' + langs + '.hand', 'w') as f:
+        f.write(data)
     return redirect('/texts/' + basename + '.' + langs)
 
 def search(request):
