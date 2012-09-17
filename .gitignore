@@ -17,3 +17,5 @@ translate.txt
 *.bbl
 *.toc
 *.blg
+*.pdf
+external/
