@@ -73,6 +73,9 @@ class Text(object):
         return [ split_sentences(p, self.lang)
                  for p in self.paragraphs ]
 
+    def pretty_print(self):
+        print self.as_string().encode('utf-8')
+
     # maybe also as words?
 
     def __str__(self):
@@ -102,7 +105,5 @@ def _write_paragraphs(paragraphs, stream, coding='utf8'):
         first = False
         paragraph = paragraph.strip()
         paragraph = '\n'.join(textwrap.wrap(paragraph.strip()))
-        if not isinstance(paragraph, unicode):
-            paragraph = unicode(paragraph, 'utf8', errors='ignore')
-        paragraph = paragraph.encode(coding)
-        stream.write(paragraph + '\n')
+        assert isinstance(paragraph, unicode)
+        stream.write(paragraph + u'\n')

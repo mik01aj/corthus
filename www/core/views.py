@@ -40,15 +40,19 @@ def text(request, basename, langs):
         n = len(seqs)
         sents_waiting = [[] for i in xrange(n)]
         table_row = None
-        all_ranges = alignment.as_ranges(with_costs=False)
-        for rung_num, rung_ranges in enumerate(all_ranges):
+        all_rungs = alignment.as_ranges(with_costs=False)
+
+        # each rung has a range of sentences for each language
+        for rung_num, rung_ranges in enumerate(all_rungs):
             assert len(rung_ranges) == len(seqs)
 
             # finishing the cell (if ¶ everywhere or similar situation)
-            all_break = all(s >= len(seq) or s==e
-                            or seq[s] == '¶' or seq[s-1] == '¶'
+            all_break = all(s >= len(seq)
+                            or s==e
+                            or seq[s] == '¶'
+                            or seq[s-1] == '¶'
                             for (seq, (s, e)) in zip(seqs, rung_ranges))
-            if (all_break or rung_num == len(all_ranges)-1) and table_row:
+            if (all_break or rung_num == len(all_rungs)-1) and table_row:
                 if any(cell['sentences'] for cell in table_row):
                     yield table_row
                 table_row = None
@@ -128,6 +132,7 @@ def text(request, basename, langs):
 
     # creating table
     table = list(as_table(a, ts, langs))
+    a.dump('/tmp/b')
 
     info = 'Using backend: ' + backend
 
@@ -155,7 +160,7 @@ def text(request, basename, langs):
 def correct(request, basename, langs):
     data = request.POST['corrections']
     for line in data.splitlines():
-        if not re.match('\d+\t\d+\t?$', line):
+        if not re.match('(\d+\t){%d}\d+$' % len(langs.split('-')), line):
             print line
             return HttpResponse('invalid data :(', status=500)
     # TODO some more data checking

@@ -43,9 +43,13 @@ a.current { font-weight: bold; color: black; }
 .sentence .label { font: bold 0.7em/100% sans;
                    margin:0; padding: 2px; text-indent: 0;
                    position: absolute; left:0; top: -1em;
-                   background-color: #ff8; color: #B13030;
+                   background-color: #FFFF61; color: #B13030;
                    visibility: hidden; }
+
+.sentence:hover { background-color: #FFFF61 !important; }
 .sentence:hover .label { visibility: visible; }
+.sentence.highlight { background-color: #ffa; }
+.sentence.highlight2 { background-color: #ffa; }
 .sentence.selected { background-color: #FFBA70; }
 .sentence.selected2 { background-color: #FFDAB3; }
 

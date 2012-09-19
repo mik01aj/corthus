@@ -61,7 +61,10 @@ class Alignment:
         data = []
         with open(file_path) as f:
             for row in csv.reader(f, dialect='excel-tab'):
-                data.append([int(x) for x in row[:-1]] + [float(row[-1])])
+                if kwargs.get('no_costs', False):
+                    data.append([int(x) for x in row])
+                else:
+                    data.append([int(x) for x in row[:-1]] + [float(row[-1])])
         if not data:
             raise IOError, data
         return Alignment(data, *args, **kwargs)
@@ -100,8 +103,8 @@ class Alignment:
                 result_row = []
                 if sequences:
                     for i in range(self.N):
-                        if len(sequences[i]) <= row[i]:
-                            raise IndexError("sequence too short", i, row[i], sequences[i])
+#                        if len(sequences[i]) <= row[i]:
+#                            raise IndexError("sequence too short", i, row[i])
                         result_row.append(sequences[i][previous_row[i]:row[i]])
                 else:
                     result_row = [(previous_row[i], row[i]) for i in range(self.N)]

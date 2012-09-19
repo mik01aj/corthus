@@ -4,12 +4,13 @@ $(document).ready(
 
       var mapped = {};
       var textarea = document.getElementById('corrections');
-      var active_checkbox = document.getElementById('correction-active');
+      var active_checkbox = document.getElementById('match-radio');
 
       active_checkbox.checked = true;
 
       function set_selection(lang, num, status, className) {
          className = (typeof className !== 'undefined') ? className : 'selected';
+         console.log(lang + "-" + num + " " + status);
          if (status) /* select */
             document.getElementById(lang + "-" + num).classList.add(className);
          else /* deselect */
@@ -29,11 +30,20 @@ $(document).ready(
             set_selection(clicked_lang, clicked_num, true);
          });
 
-      $(document).keypress(
+      $(document).keyup(
          function(event) {
             if (!active_checkbox.checked)
                return;
-            if (event.which != 13) /* enter */
+            /* console.log(event.keyCode); */
+            if (event.keyCode == 27) { /* esc */
+               for (i in langs) {
+                  var selected_num = mapped[langs[i]];
+                  set_selection(langs[i], selected_num, false);
+               }
+               mapped = {};
+               return;
+            }
+            if (event.keyCode != 13) /* not enter */
                return;
             var rung_str = '';
             for (i in langs) {
@@ -42,12 +52,12 @@ $(document).ready(
                set_selection(langs[i], selected_num, false);
                set_selection(langs[i], selected_num, true, 'selected2');
             }
-            textarea.value += rung_str;
+            textarea.value += rung_str + "0";
 
             /* sorting rows */
             var sortfun = function(x, y) { return parseInt(x)-parseInt(y); };
             textarea.value = textarea.value.split('\n').sort(sortfun).join('\n');
-            
+
             textarea.value += '\n';
          });
 

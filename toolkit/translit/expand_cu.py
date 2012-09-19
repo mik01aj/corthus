@@ -201,8 +201,16 @@ to_re = lambda l: '(%s)' % '|'.join(map(re.escape, l))
 number_regex = number_regex.replace('$A', to_re(numbers_1))
 number_regex = number_regex.replace('$B', to_re(numbers_10))
 number_regex = number_regex.replace('$C', to_re(numbers_100))
-del(to_re)
 number_regex = re.compile(number_regex, re.UNICODE | re.MULTILINE)
+
+pairs.sort(cmp=lambda (x, x2), (y, y2): -cmp(len(x), len(y)))
+
+number_pairs = []
+for i in range(9):
+    number_pairs.append((numbers_1[i], i+1))
+    number_pairs.append((numbers_10[i], (i+1)*10))
+    number_pairs.append((numbers_100[i], (i+1)*100))
+number_pairs.sort(cmp=lambda (x, x2), (y, y2): -cmp(len(x), len(y))) # by length
 
 def convert_number(m):
     """Converts a church-slavonic number to normal form (assuming that
@@ -216,10 +224,10 @@ def convert_number(m):
                 number += (i+1)*1000
                 m = m[len('#' + numbers_1[i]):]
                 break
-    for i in range(9):
-        if numbers_1[i]   in m: number += (i+1)
-        if numbers_10[i]  in m: number += (i+1)*10
-        if numbers_100[i] in m: number += (i+1)*100
+    for n, value in number_pairs:
+        if n in m:
+            number += value
+            m = m.replace(n, '')
     return number
 
 def replace_numbers(text):

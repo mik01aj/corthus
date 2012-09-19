@@ -155,14 +155,16 @@ pairs_el = [
     ("’",   ""),
     ]
 
-def metaphone_generic(pairs, word, lang='<?>'):
+def metaphone_generic(pairs, word, lang='<?>',
+                      remove_vowels=True, max_length=6):
     original_word = word
     for (pattern, replacement) in pairs:
         word = word.replace(pattern, replacement)
     if not word:
         return '-'
-    for vowel in "aeiou":
-        word = word[0] + word[1:].replace(vowel, '')
+    if remove_vowels:
+        for vowel in "aeiou":
+            word = word[0] + word[1:].replace(vowel, '')
     for c in word:
         if c not in metaphone_charset:
             if WARNINGS_ENABLED:
@@ -170,28 +172,28 @@ def metaphone_generic(pairs, word, lang='<?>'):
                      % (c, original_word, word, lang))
                 print >> sys.stderr, w.encode('utf-8')
             return '?'
-    return word[:6] # cutting to 6 chars
+    return word[:max_length] # cutting to `max_length` chars
 
-def metaphone_pl(word):
-    return metaphone_generic(pairs_pl, word, 'pl')
+def metaphone_pl(word, **kwargs):
+    return metaphone_generic(pairs_pl, word, 'pl', **kwargs)
 
-def metaphone_cu(word):
+def metaphone_cu(word, **kwargs):
     word = expand_cu(word, numbers=True)
     m = re.match('[^\w]*([0-9]+)[^\w]*', word)
     if m:
         return "#" + m.group(1)
-    return metaphone_generic(pairs_cu, word, 'cu')
+    return metaphone_generic(pairs_cu, word, 'cu', **kwargs)
 
-def metaphone_el(word):
+def metaphone_el(word, **kwargs):
     word = simplify_el(word)
     m = re.match('[^\w]*([0-9]+)[^\w]*', word)
     if m:
         return "#" + m.group(1)
     if any(word.endswith(suffix) for suffix in ['εν', 'ον']):
         word = word[:-1]
-    return metaphone_generic(pairs_el, word, 'el')
+    return metaphone_generic(pairs_el, word, 'el', **kwargs)
 
-def metaphone(word, lang=None):
+def metaphone(word, lang=None, **kwargs):
     word = word.lower()
     word = ignored_chars_regex.sub("", word)
     if not word:
@@ -207,18 +209,18 @@ def metaphone(word, lang=None):
         fun = { 'pl' : metaphone_pl,
                 'cu' : metaphone_cu,
                 'el' : metaphone_el }[lang]
-        return fun(word)
+        return fun(word, **kwargs)
     except KeyError:
         try:
             global WARNINGS_ENABLED
             WARNINGS_ENABLED = False
-            m = metaphone_cu(word)
+            m = metaphone_cu(word, **kwargs)
             if m != '?':
                 return m
-            m = metaphone_pl(word)
+            m = metaphone_pl(word, **kwargs)
             if m != '?':
                 return m
-            m = metaphone_el(word)
+            m = metaphone_el(word, **kwargs)
             return m
         finally:
             WARNINGS_ENABLED = True
@@ -241,7 +243,7 @@ def detect_language(text):
     return None
 
 
-def metaphone_text(text, lang=None):
+def metaphone_text(text, lang=None, **kwargs):
     """The only diference between this function and single-word
     `metaphone`: language detection is done only once (so not on
     per-word basis). Returns a string.
@@ -250,7 +252,7 @@ def metaphone_text(text, lang=None):
     if not lang:
         lang = detect_language(text)
     #TODO some smarter word splitting
-    return ' '.join(metaphone(word, lang) for word in text.split())
+    return ' '.join(metaphone(word, lang, **kwargs) for word in text.split())
 
 #def test():
 #    cu_examples = [("прилjь'жнw",     "prile2no"),
@@ -292,5 +294,5 @@ if __name__ == '__main__':
         sys.exit()
     for line in inputFile:
         line = line[:-1].decode('utf-8') # omitting '\n'
-        print " ".join(metaphone_text(line))
+        print metaphone_text(line, remove_vowels=False, max_length=10)
     inputFile.close()

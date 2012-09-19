@@ -202,10 +202,17 @@ def iter_pairs(seq):
         prev = elem
 
 def make_composed_alignment(seq1, seq2, forced_rungs):
-    forced_rungs = [(0,0)] + forced_rungs + [(len(seq1), len(seq2))]
+    """Make an alignment with some rungs forced. It splits both
+    sequences to pieces, and then composes an alignment from
+    alignments on these parts. (Note: splitting text to parts also
+    greatly improves performance)
+    """
+    forced_rungs = [(0,0)] + list(forced_rungs) + [(len(seq1), len(seq2))]
     def gen():
-        yield (0, 0, 0.0)
+        yield (0, 0, 0.0) #?
         for (_fi, _fj), (fi, fj) in iter_pairs(forced_rungs):
+#            if fi-_fi-1 <= 0 or fj-_fj-1 <= 0:
+#                continue
             print >> sys.stderr, "Aligning %d:%d--%d:%d (%d--%d sents)..." % \
                 (_fi+1, fi, _fj+1, fj, fi-_fi-1, fj-_fj-1)
             part_alignment = align(seq1[_fi+1:fi], seq2[_fj+1:fj])
@@ -234,10 +241,8 @@ if __name__ == '__main__':
                         help='text folder')
     parser.add_argument('lang1')
     parser.add_argument('lang2')
-    parser.add_argument('--plot', action="store_true", default=False,
-                        help='plots the cost table to plot.png')
-    parser.add_argument('--text', action="store_true", default=False,
-                        help='shows the alignment as pretty-printed text')
+#    parser.add_argument('--plot', action="store_true", default=False,
+#                        help='plots the cost table to plot.png')
     parser.add_argument('--hand', action="store_true", default=None,
                         help='use file with hand-aligned sentence pairs')
 
@@ -248,13 +253,13 @@ if __name__ == '__main__':
         print '%10s = %s' % (k, v)
     print
 
+    # reading hand alignment
     forced_rungs = []
     if args.hand:
-        with open('%s/%s-%s.hand' % (args.folder, args.lang1, args.lang2)) as f:
-            for line in f:
-                i, j = line.split()
-                forced_rungs.append((int(i), int(j)))
-        print >> sys.stderr, "%d hand-aligned pairs found." % len(forced_rungs)
+        filename = '%s/%s-%s.hand' % (args.folder, args.lang1, args.lang2)
+        forced_rungs = Alignment.from_file(filename).as_ladder(with_costs=False)
+        print >> sys.stderr, "%d hand-aligned pairs found in %s." % \
+            (len(forced_rungs), filename)
 
     def read(filename, lang):
         with codecs.open(filename, encoding='utf-8') as f:
@@ -269,15 +274,13 @@ if __name__ == '__main__':
                             '../data/pairs.%s-%s' % (args.lang1, args.lang2))
     pair_manager = PairManager.from_file(pairfile)
 
-#    a = align(t1, t2, plot_filename='plot.png' if '-plot' in opts else None)
-    a = make_composed_alignment(t1, t2, forced_rungs)
-    a = Alignment(a)
-
-    output_filename = '%s/%s-%s.my' % (args.folder, args.lang1, args.lang2)
-    with open(output_filename, 'w') as f:
-        for i, j, c in a.data:
-            f.write("%d\t%d\t%.2f\n" % (i, j, c))
-    print >> sys.stderr, "Wrote alignment to %s." % output_filename
-
-    if args.text:
-        a.pretty_print(t1, t2)
+    try:
+        #a = align(t1, t2, plot_filename='plot.png' if '-plot' in opts else None)
+        a = make_composed_alignment(t1, t2, forced_rungs)
+        a = Alignment(a)
+    finally:
+        output_filename = '%s/%s-%s.my' % (args.folder, args.lang1, args.lang2)
+        with open(output_filename, 'w') as f:
+            for i, j, c in a.data:
+                f.write("%d\t%d\t%.2f\n" % (i, j, c))
+        print >> sys.stderr, "Wrote alignment to %s." % output_filename

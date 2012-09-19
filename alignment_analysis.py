@@ -7,6 +7,7 @@ output, it prints all repeated pairs, starting from the most frequent.
 
 Usage: ./alignment_analysis.py file1.pl-cu.hunalign [file2.pl-cu.golden...]
        (assuming existence of file1.pl.txt, file1.cu.txt, and so on)
+or:    ./alignment_analysis.py `find texts/ -name '*.pl-cu.hunalign'`
 """
 
 import sys
@@ -14,8 +15,12 @@ from toolkit import Text, Alignment
 import re
 from collections import defaultdict
 
+all1 = []
+all2 = []
+
 def read_all_pairs(filename):
     """Iterates over sentence pairs in a file.
+    (and adds all sentences to all1 and all2)
     """
     m = re.match('(.*)/(\w\w)-(\w\w).\w+$', filename)
     assert m
@@ -34,7 +39,11 @@ def read_all_pairs(filename):
 #    print "%s text: %d sentences" % (lang2, len(seq2))
     separator = unicode(' ♦ ', 'utf-8')
     for s1, s2 in alignment.as_ranges(seq1, seq2):
-        yield separator.join(s1), separator.join(s2)
+        s1 = separator.join(s1)
+        s2 = separator.join(s2)
+        all1.append(s1)
+        all2.append(s2)
+        yield s1, s2
 
 if __name__ == '__main__':
 
@@ -60,6 +69,13 @@ if __name__ == '__main__':
                           in translations.iteritems()]
     translations_as_list.sort(reverse=True)
 
+    freqs1 = defaultdict(lambda: 0)
+    for sent in all1:
+        freqs1[sent] += 1
+    freqs2 = defaultdict(lambda: 0)
+    for sent in all2:
+        freqs2[sent] += 1
+
     for count, (s1, s2) in translations_as_list:
         if count < 2:
             break
@@ -70,6 +86,6 @@ if __name__ == '__main__':
             continue
 
         print count
-        print s1.encode('utf-8')
-        print s2.encode('utf-8')
+        print freqs1[s1], s1.encode('utf-8')
+        print freqs2[s2], s2.encode('utf-8')
         print

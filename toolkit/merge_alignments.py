@@ -20,6 +20,7 @@ def merge_3_alignments(al12, al23, al31):
     #TODO partial matches
 
     def gen():
+        yield (0, 0, 0)
         prev_i2 = 0
         for (i1, i2) in al12:
             for _i2 in range(prev_i2+1, i2+1):
@@ -27,7 +28,6 @@ def merge_3_alignments(al12, al23, al31):
                     i3s = map23[_i2]
                     for i3 in i3s:
                         # if map31[i3] == i1:
-                        print ">", (i1, _i2, i3)
                         yield (i1, _i2, i3)
                 except KeyError:
                     pass

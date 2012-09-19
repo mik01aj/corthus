@@ -30,7 +30,8 @@ reload_page_on_change = true;
 <div class="hidden-frame">
   <form id="correction" method="post" action="{{ request.path }}/correct">{% csrf_token %}
     <h3>Corrections</h3>
-    <p><input id="correction-active" type="checkbox" value="y" /><label for="correction-active">active</label></p>
+    <p><input id="match-radio" name="tool" type="radio" value="match-radio" /><label for="match-radio">match sentences</label></p>
+    <p><input id="split-radio" name="tool" type="radio" value="split-radio" /><label for="split-radio">split fragments</label></p>
     <p>Click sentences you want to link, and press Enter to add them here.</p>
     <p><textarea id="corrections" name="corrections">{{ corrections }}</textarea></p>
     <p><input type="submit" value="Save corrections" /></p>
