@@ -18,4 +18,6 @@ translate.txt
 *.toc
 *.blg
 *.pdf
+*.lof
+*.lot
 external/
