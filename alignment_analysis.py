@@ -10,21 +10,25 @@ Usage: ./alignment_analysis.py file1.pl-cu.hunalign [file2.pl-cu.golden...]
 or:    ./alignment_analysis.py `find texts/ -name '*.pl-cu.hunalign'`
 """
 
+from __future__ import division
+
 import sys
 from toolkit import Text, Alignment
 import re
 from collections import defaultdict
 
-all1 = []
-all2 = []
+from toolkit.preprocess import preprocess
+
+lang1 = '' # a hack to get languages easily
+lang2 = ''
 
 def read_all_pairs(filename):
     """Iterates over sentence pairs in a file.
-    (and adds all sentences to all1 and all2)
     """
     m = re.match('(.*)/(\w\w)-(\w\w).\w+$', filename)
     assert m
     basename = m.group(1)
+    global lang1, lang2
     lang1 = m.group(2)
     lang2 = m.group(3)
     try:
@@ -39,18 +43,16 @@ def read_all_pairs(filename):
 #    print "%s text: %d sentences" % (lang2, len(seq2))
     separator = unicode(' ♦ ', 'utf-8')
     for s1, s2 in alignment.as_ranges(seq1, seq2):
-        s1 = separator.join(s1)
-        s2 = separator.join(s2)
-        all1.append(s1)
-        all2.append(s2)
+        s1 = preprocess(separator.join(s1))
+        s2 = preprocess(separator.join(s2))
         yield s1, s2
 
 if __name__ == '__main__':
 
-    # translation pair histogram
-    translations = defaultdict(lambda: 0)
-    sentence_occurences1 = defaultdict(lambda: 0)
-    sentence_occurences2 = defaultdict(lambda: 0)
+    # occurence counts for pairs and sentences
+    occ_pairs = defaultdict(lambda: 0)
+    occ_sent1 = defaultdict(lambda: 0)
+    occ_sent2 = defaultdict(lambda: 0)
 
     filenames = sys.argv[1:]
     if not filenames:
@@ -60,32 +62,37 @@ if __name__ == '__main__':
     for f in filenames:
         for s1, s2 in read_all_pairs(f):
             if s1 and s2:
-                sentence_occurences1[s1] += 1
-                sentence_occurences2[s2] += 1
-                translations[s1, s2] += 1
+                occ_sent1[s1] += 1
+                occ_sent2[s2] += 1
+                occ_pairs[s1, s2] += 1
 
-    translations_as_list = [(count, translation)
-                          for (translation, count)
-                          in translations.iteritems()]
-    translations_as_list.sort(reverse=True)
+    num_possible_pairs = ((len(occ_sent1) + 1) *
+                          (len(occ_sent2) + 1)) # +1 for hapax pair
+    hapax_prob = (1/num_possible_pairs) # same as normal, with count=occ*=0
 
-    freqs1 = defaultdict(lambda: 0)
-    for sent in all1:
-        freqs1[sent] += 1
-    freqs2 = defaultdict(lambda: 0)
-    for sent in all2:
-        freqs2[sent] += 1
+    pairs_list = []
+    for (s1, s2), pair_count in occ_pairs.iteritems():
 
-    for count, (s1, s2) in translations_as_list:
-        if count < 2:
-            break
-
-        # if these sentences occur paired with each other,
-        # at least every 5th time they occur at all
-        if sentence_occurences1[s1] + sentence_occurences2[s2] > 10 * count:
+        if pair_count < 2:
             continue
 
-        print count
-        print freqs1[s1], s1.encode('utf-8')
-        print freqs2[s2], s2.encode('utf-8')
+        occ1 = occ_sent1[s1]
+        occ2 = occ_sent2[s2]
+
+        # calculate_cost
+        prob = (pair_count*2 + 1/num_possible_pairs) / (occ1 + occ2 + 1)
+        assert prob > hapax_prob
+
+        pairs_list.append((prob, s1, s2, pair_count, occ1, occ2))
+
+    pairs_list.sort(reverse=True)
+
+    print '_f', 'p', hapax_prob
+    print
+
+    for prob, s1, s2, pair_count, occ1, occ2 in pairs_list:
+        print ("_f %d %s %d %s %d p %.4f" %
+               (pair_count, lang1, occ1, lang2, occ2, prob))
+        print lang1, s1.encode('utf-8')
+        print lang2, s2.encode('utf-8')
         print

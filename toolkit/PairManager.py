@@ -1,57 +1,94 @@
-
-import codecs
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 """
 A class for managing large sets of translation pairs.
 """
 
-#TODO sentence occurence count and pair occurence count
+from __future__ import unicode_literals
+
+import codecs
+import re
+
+from NewAlignment import NewAlignment
 
 class PairManager:
 
-    def __init__(self, pairs):
-        """pairs: list of sentence pairs
-        """
-        self.pairs = set(pairs)
-        self.forward = { a : b for (a, b) in pairs }
-        self.reversed = { b : a for (a, b) in pairs }
+    def __init__(self):
+        self.pairs = {}
+        self.pairs_by_prob = []
+        self.hapax_prob = None
 
     @classmethod
     def from_file(cls, file_path):
-        pairs = set()
-        with codecs.open(file_path, encoding='utf-8') as f:
-            for (count, s1, s2, emptyline) in _group_by_4(f):
-                pairs.add( (s1.strip(), s2.strip()) )
-                #count = int(count)
-                assert emptyline == '\n'
-        return PairManager(pairs)
+        m = re.match('.*(\w\w)-(\w\w)$', file_path)
+        lang1 = m.group(1)
+        lang2 = m.group(2)
+        pm = PairManager()
+        with codecs.open(file_path) as f:
+            na = NewAlignment.read(f)
+            first = True
+            for row in na:
+                if first:
+                    pm.hapax_prob = float(row['_f'].split()[-1])
+                    first = False
+                    continue
+                count = int(row['_f'].split()[0])
+                prob = float(row['_f'].split()[-1])
+                pm.pairs[row[lang1], row[lang2]] = (count, prob)
+                pm.pairs_by_prob.append((prob, row[lang1], row[lang2]))
+        pm.pairs_by_prob.sort(reverse=True)
+        return pm
+
+    def iter_best_pairs(self, threshold=None, count=None):
+        """Iterate over `count` best pairs. If there are more than
+        `count` with probability estimated above `threshold`, it will
+        yield more."""
+        for i, (prob, s1, s2) in enumerate(self.pairs_by_prob):
+            if threshold and prob < threshold:
+                if not count or i > count:
+                    break
+            yield prob, s1, s2
+
+    def get_pair_prob(self, s1, s2):
+        try:
+            return self.pairs[s1, s2][1]
+        except KeyError:
+            return self.hapax_prob
 
     def has_pair(self, s1, s2):
-        return ((s1, s2) in self.pairs)
-
-    def has_sent1(self, s):
-        return s in self.forward
-
-    def has_sent2(self, s):
-        return s in self.reversed
+        return (s1, s2) in self.pairs
 
 
-def _group_by_4(iterator):
-    while True:
-        a = next(iterator) # StopIteration here is ok
-        try:
-            b = next(iterator)
-            c = next(iterator)
-            d = next(iterator)
-            yield (a, b, c, d)
-        except StopIteration:
-            assert False, "sequence length should be divisible by 4"
+if __name__ == '__main__':
+    import matplotlib
+#    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
 
+#    size = 20
+#    fig = plt.figure(figsize=(size, size))
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
 
-# test (very simple, executed at each import)
-_pm = PairManager([('a', 'b'), ('a', 'c')])
-assert _pm.has_pair('a', 'c')
-assert _pm.has_sent1('a')
-assert _pm.has_sent2('b')
-assert not _pm.has_sent2('a')
-del _pm
+    pms = [PairManager.from_file('data/pairs.pl-cu'),
+           PairManager.from_file('data/pairs.cu-el'),
+           PairManager.from_file('data/pairs.pl-el')]
+
+    styles = ['D', 'o', 's']
+
+    for pm, st in zip(pms, styles):
+        histogram = { i : 0 for i in range(100) }
+        for count, _ in pm.pairs.itervalues():
+            try:
+                histogram[count] += 1
+            except KeyError:
+                histogram[count] = 1
+        xs, ys = zip(*histogram.items())
+        ax.plot(xs, ys, c=(0, 0, 0, 1))
+    ax.set_xlabel(r'liczba wystąpień pary', fontsize=20)
+    ax.set_ylabel(r'liczba par', fontsize=20)
+    ax.set_xlim([0, 100])
+    ax.set_ylim([0, 100])
+    ax.grid(True)
+
+    plt.show()

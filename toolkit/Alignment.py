@@ -16,6 +16,7 @@ Usage examples:
 """
 
 from __future__ import unicode_literals
+from __future__ import division
 
 import csv
 
@@ -133,16 +134,35 @@ class Alignment:
         return list(gen())
 
     def evaluate(self, golden):
-        """Return precision and recall from comparison of two alignments.
-        """
-        #TODO: 1. a,x b,x b,y == a,x a,y b,y
-        #      2. a,x a,y a,z == a,x a,z
-        intersection = set(row[:-1] for row in self.data) & \
-                       set(row[:-1] for row in golden)
-        precision = len(intersection) / len(self.data)
-        recall = len(intersection) / len(golden)
-        return "Precision: %.2f%%, Recall: %.2f%%" % (precision*100, recall*100)
-        #return (precision, recall)
+        assert self.N == 2
+
+        def as_pairs(a):
+            for (s1, e1), (s2, e2) in a.as_ranges():
+                i_s = range(s1, e1)
+                if not i_s:
+                    i_s = [None]
+                j_s = range(s2, e2)
+                if not j_s:
+                    j_s = [None]
+                weight = 1/(len(i_s)*len(j_s))
+                for i in i_s:
+                    for j in j_s:
+                        yield (i, j), weight
+
+        ps1 = dict(as_pairs(self))
+        ps2 = dict(as_pairs(golden))
+
+        assert abs(sum(ps1.values()) + 1 - len(self.data)) < 0.0001
+        assert abs(sum(ps2.values()) + 1 - len(golden.data)) < 0.0001
+
+        intersection_weight1 = sum(ps1[p] for p in set(ps1).intersection(ps2))
+        intersection_weight2 = sum(ps2[p] for p in set(ps1).intersection(ps2))
+
+        precision = intersection_weight1 / (len(self.data) - 1)
+        recall    = intersection_weight2 / (len(golden.data) - 1)
+        print "Precision: %.2f%%, Recall: %.2f%%" % (precision*100, recall*100)
+        return (precision, recall)
+
 
     def pretty_print(self, *sequences):
         from textwrap import wrap
@@ -158,7 +178,7 @@ class Alignment:
                 for s, num in zip(sequences[i][_j:j], range(_j, j)):
                     n = '♦' + unicode(num) + ' '
                     lines[-1].extend(wrap(n + s, 35))
-            lines.append(["%.1f" % row[-1]]) # cost
+            lines.append(["%4.1f" % row[-1]]) # cost
             for output_row in izip_longest(*lines): # one output_row = one line of output
                 output_row = list(output_row)
                 for i in range(self.N+1):
@@ -170,6 +190,29 @@ class Alignment:
                 print s.encode('utf-8') # a workaround for `less`
             print
 
+
+#if __name__ == '__main__':
+#    a1 = Alignment.from_file('/tmp/pl-cu.my')
+#    a2 = Alignment.from_file('/tmp/pl-cu.new')
+#    a1.evaluate(a2)
+#    a2.evaluate(a2)
+#
+#    half = Alignment(a2.data[:int(len(a2.data)/2)])
+#    a2.evaluate(half)
+#    half.evaluate(a2)
+#
+#    trivial = Alignment([a2.data[0], a2.data[-1]])
+#    a2.evaluate(trivial)
+#    trivial.evaluate(a2)
+#
+#    skip_all = Alignment([a2.data[0],
+#                          (a2.data[0][0], a2.data[-1][1], 0),
+#                          a2.data[-1]])
+#    a2.evaluate(skip_all)
+#    skip_all.evaluate(a2)
+#
+#
+#    raise SystemExit
 
 if __name__ == '__main__':
     import sys

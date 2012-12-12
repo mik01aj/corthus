@@ -35,22 +35,22 @@ if __name__ == '__main__':
 
     while files:
         filename = files.pop()
-        m = re.match('(.+)/([a-z]{2}).txt', filename)
+        m = re.match('(.+)/([a-z]{2}).txt$', filename)
         if m:
             basename = m.group(1)
-            lang = m.group(1)
+            lang = m.group(2)
             grouped[basename] = grouped.get(basename, []) + [lang]
             if parity == 1:
-                print basename + '.' + lang + suffix
+                print basename + '/' + lang + suffix
 
     if parity == 2:
         for k, v in sorted(grouped.items()):
             if 'pl' in v and 'cu' in v:
-                print k + '.pl-cu' + suffix
+                print k + '/pl-cu' + suffix
             if 'cu' in v and 'el' in v:
-                print k + '.cu-el' + suffix
+                print k + '/cu-el' + suffix
             if 'pl' in v and 'el' in v:
-                print k + '.pl-el' + suffix
+                print k + '/pl-el' + suffix
     elif parity == 3:
         for k, v in sorted(grouped.items()):
             if 'pl' in v and 'cu' in v and 'el' in v:

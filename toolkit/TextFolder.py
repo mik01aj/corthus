@@ -67,8 +67,11 @@ class TextFolder:
         return Alignment(_transpose(chosen_columns))
 
     def get_sentences(self, lang):
-        with open(self._p(str(lang) + '.sentences')) as f:
-            return [line.strip().decode('utf-8') for line in f]
+        try:
+            with open(self._p(str(lang) + '.sentences')) as f:
+                return [line.strip().decode('utf-8') for line in f]
+        except IOError:
+            raise IOError("%s sentences not available for %s" % (lang, self.name))
 
     def show(self, langs):
         """pretty-prints a text or alignment."""

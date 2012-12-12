@@ -27,6 +27,7 @@ reload_page_on_change = true;
   </form>
 </div>
 
+{% if langs|length == 5 and table %}{# 5 - string length #}
 <div class="hidden-frame">
   <form id="correction" method="post" action="{{ request.path }}/correct">{% csrf_token %}
     <h3>Corrections</h3>
@@ -37,6 +38,7 @@ reload_page_on_change = true;
     <p><input type="submit" value="Save corrections" /></p>
   </form>
 </div>
+{% endif %}
 {% endblock %}
 
 

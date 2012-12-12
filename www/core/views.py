@@ -81,7 +81,7 @@ def text(request, basename, langs):
 
         yield table_row
 
-    # getting navigation links
+    # FIXME getting navigation links
     other_basenames = set()
     navigation_links = []
     for f in os.listdir(os.path.dirname(TEXTS_ROOT + '/' + basename)):

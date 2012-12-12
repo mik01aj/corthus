@@ -71,7 +71,7 @@
       \vspace{10mm}
 
    Potwierdzam, że niniejsza praca została przygotowana pod moim
-   kierunkiem i kwalifikuje się do przedstawienia jej w postępowaniu
+   kierunkiem i~kwalifikuje się do przedstawienia jej w postępowaniu
    o nadanie tytułu zawodowego.
    \vspace{15mm}
 

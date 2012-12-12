@@ -1,13 +1,17 @@
-#! -*- coding: utf-8 -*-
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+from preprocess import preprocess
 import textwrap
 import re
 import sys
 
-class Row(object):
-    def __init__(self):
-        self.fragments = {}
+class Row(dict):
+    def __init__(self, d=None):
+        if d:
+            for k, v in d.items():
+                self[k] = v
         self.next = {}
         self.prev = {}
         self.next_row = None
@@ -23,14 +27,14 @@ class NewAlignment(object):
 
     def append(self, row):
         """This method appends a row to self.rows, updating the
-        references as needed. Don't add rows manually, as this will
-        break references!"""
+        references as needed. Don't append rows manually to self.rows,
+        as this will break references!"""
 
         # updating references
         if self.rows:
             row.prev_row = self.rows[-1]
             row.prev_row.next_row = row
-        for lang in row.fragments:
+        for lang in row:
             if lang in self.prev_refs:
                 row.prev[lang] = self.prev_refs[lang]
                 row.prev[lang].next[lang] = row
@@ -46,9 +50,17 @@ class NewAlignment(object):
             if not d[k]:
                 del d[k]
         if d:
-            row = Row()
-            row.fragments = d
+            row = Row(d)
             self.append(row)
+
+    @classmethod
+    def from_folder(cls, path):
+        from TextFolder import TextFolder
+        pt = TextFolder(path)
+        langs = ['pl', 'cu', 'el']
+        oa = pt.get_alignment(langs, 'my')
+        seqs = [pt.get_sentences(lang) for lang in langs]
+        return NewAlignment.from_old_alignment(oa, langs, seqs)
 
     @classmethod
     def from_old_alignment(cls, alignment, langs, seqs):
@@ -61,7 +73,6 @@ class NewAlignment(object):
             # fragments - one row from alignment table: [f1, f2, ..., cost]
 
             row = Row()
-            row.fragments = {}
             for lang, fragment in zip(langs, fragments):
 
                 if fragment:
@@ -69,16 +80,17 @@ class NewAlignment(object):
                     fragment = re.sub('\s*♦?\s*¶\s*♦\s*', ' ¶ ',
                                       fragment, re.UNICODE)
                     fragment = fragment.strip()
-                    if fragment == '¶' and prev[lang]:
-                        if prev[lang].fragments[lang].endswith('♦'):
-                            prev[lang].fragments[lang] = \
-                                prev[lang].fragments[lang][:-1] + "¶"
+                    if lang in prev and fragment == '¶':
+                        prev_row_with_lang = prev[lang]
+                        if prev_row_with_lang[lang].endswith('♦'):
+                            prev_row_with_lang[lang] = \
+                                prev_row_with_lang[lang][:-1] + "¶"
                         else:
-                            prev[lang].fragments[lang] += " ¶"
+                            prev_row_with_lang[lang] += " ¶"
                         continue
-                    row.fragments[lang] = fragment
+                    row[lang] = fragment
 
-            if not row.fragments:
+            if not row:
                 continue
 
             a.append(row)
@@ -87,16 +99,17 @@ class NewAlignment(object):
 
     def dump(self, stream=sys.stdout):
         for row in self.rows:
-            for lang, fragment in sorted(row.fragments.items()):
+            for lang, fragment in sorted(row.items()):
                 print >> stream, lang, unicode(fragment).encode('utf-8')
             print >> stream
 
-    def pprint_text(self, lang, stream=sys.stdout, width=70):
-        fragments = []
+    def iter_fragments(self, lang):
         for row in self.rows:
-            if lang in row.fragments:
-                fragments.append(row.fragments[lang])
-        string = ''.join(fragments)
+            if lang in row:
+                yield row[lang]
+
+    def pprint_text(self, lang, stream=sys.stdout, width=70):
+        string = ' '.join(self.iter_fragments(lang))
         paragraphs = [p.strip() for p in string.split('¶')]
         for paragraph in paragraphs:
 #            paragraph = paragraph.replace('♦', '')
@@ -112,36 +125,101 @@ class NewAlignment(object):
             for i, line in enumerate(stream):
                 line = line.decode('utf-8').strip()
                 if not line: # empty line
-                    if row.fragments:
+                    if row:
                         a.append(row)
                         row = Row()
                 else:
                     assert line[2] == ' ', line
                     try:
-                        row.fragments[line[0:2]] += " " + line[3:]
+                        row[line[0:2]] += " " + line[3:]
                     except KeyError:
-                        row.fragments[line[0:2]] = line[3:]
+                        row[line[0:2]] = line[3:]
             return a
         except Exception, e:
             raise IOError("parse error in line %d: %s" % (i, e))
 
     def export_sentences_for_giza(self, lang1, lang2, stream1, stream2,
                                   use_metaphone=True):
-        from translit import metaphone_text
-        def preprocess_sent(sent):
-            sent = re.sub('[¶♦\'=`^]', '', sent)
-            sent = re.sub('([.,:;!?])', r' \1 ', sent)
-            sent = re.sub('\s+', ' ', sent)
-            sent = sent.lower()
-            if use_metaphone:
-                sent = metaphone_text(sent, remove_vowels=False, max_length=20)
-            return sent
         for row in self.rows:
-            if lang1 in row.fragments and lang2 in row.fragments:
-                sent1 = row.fragments[lang1]
-                sent2 = row.fragments[lang2]
-                print >> stream1, preprocess_sent(sent1).encode('utf-8')
-                print >> stream2, preprocess_sent(sent2).encode('utf-8')
+            if lang1 in row and lang2 in row:
+                print >> stream1, \
+                    preprocess(row[lang1], use_metaphone).encode('utf-8')
+                print >> stream2, \
+                    preprocess(row[lang2], use_metaphone).encode('utf-8')
+
+    def to_old_alignment(self, *langs):
+
+        def iter_sents(t):
+            t = t.replace('¶', '♦¶♦')
+            t = t.split('♦')
+            for s in t:
+                s = s.strip()
+                if s:
+                    yield s
+
+        a = []
+        ts = tuple([] for lang in langs)
+
+        # using convention from Haskell:
+        # ts - sequence of t-s
+        # ss - sequence of s-es
+        # sss - sequence of ss-es
+
+        a.append([len(t) for t in ts] + [0])
+
+        for row in self.rows:
+            something = False
+            all_p = True
+            for t, lang in zip(ts, langs):
+                ss = list(iter_sents(row.get(lang, '')))
+                if ss:
+                    something = True
+                t.extend(ss)
+                if not ss or ss[-1] != '¶':
+                    all_p = False
+            if not something:
+                continue
+            if all_p:
+                a.append([len(t)-1 for t in ts] + [0])
+            a.append([len(t) for t in ts] + [0])
+
+        from Alignment import Alignment
+        return (Alignment(a), ts)
+
+    def iter_tuples(self, *langs):
+        for row in self.rows:
+            yield tuple(row.get(lang, '') for lang in langs)
+
+    def __iter__(self):
+        if not self.rows:
+            raise StopIteration
+        r = self.rows[0]
+        while True:
+            yield r
+            r = r.next_row
+            if not r:
+                raise StopIteration
+
+    def pretty_print(self, *langs):
+        assert langs
+        from textwrap import wrap
+        from itertools import izip_longest
+        for row in self.rows:
+            lines = []
+            for lang in langs:
+                lines.append(wrap(row.get(lang, ''), 35))
+            if all(not col for col in lines):
+                continue
+            for output_row in izip_longest(*lines):
+                # one output_row = one line of output
+#                output_row = list(output_row)
+                output_row = [(col if col else '')
+                              for col in output_row]
+                s = "|".join("%-35s%s " % (col, ' '*col.count('\u0331'))
+                             for col in output_row)
+                print s.encode('utf-8') # a workaround for `less`
+            print
+
 
 #    def __str__(self):
 #        return '<NewAlignment>'
@@ -150,9 +228,30 @@ class NewAlignment(object):
 if __name__ == '__main__':
     import sys
 
-    arg = sys.argv[1]
+    try:
+        [arg] = sys.argv[1:]
+    except ValueError:
+        print 'USAGE: ./NewAlignment.py <text-folder>'
+        print '       ./NewAlignment.py export'
+        print '       ./NewAlignment.py giza'
+        raise SystemExit
 
     if arg == 'export':
+        fn = 'texts/kanon_izr/everything'
+        out = '/tmp/'
+        langs = ['pl', 'cu']
+        print 'exporting %s to %s' % (fn, out)
+        with open(fn) as f:
+            a = NewAlignment.read(f)
+        (oa, ts) = a.to_old_alignment(*langs)
+        oa.dump(out + '%s.new' % ('-'.join(langs)))
+        for lang, t in zip(langs, ts):
+            with open('/tmp/%s.sentences' % lang, 'w') as f:
+                for s in t:
+                    print >> f, s.encode('utf-8')
+        print 'done.'
+
+    elif arg == 'giza':
         with open('texts/kanon_izr/everything') as f:
             a = NewAlignment.read(f)
         with open('texts/evangelie/matfea/everything') as f:
@@ -166,11 +265,6 @@ if __name__ == '__main__':
                 a2.export_sentences_for_giza('cu', 'el', f1, f2,
                                              use_metaphone=True)
     else:
-        from TextFolder import TextFolder
-        pt = TextFolder(arg) # e.g. texts/kanon_izr
-        langs = ['pl', 'cu', 'el']
-        oa = pt.get_alignment(langs, 'my')
-        seqs = [pt.get_sentences(lang) for lang in langs]
-        a = NewAlignment.from_old_alignment(oa, langs, seqs)
-        a.dump()
+        a = NewAlignment.from_folder(arg) # e.g. texts/kanon_izr
+        #a.dump()
         a.pprint_text('pl')

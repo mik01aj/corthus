@@ -18,7 +18,7 @@ sentences: $(shell ./get_make_targets.py 1 .sentences)
 %/el.sentences: %/el.txt toolkit/sentence_splitter.py toolkit/text_export.py
 	$(H) ./toolkit/text_export.py sentences $< el > $@
 clean-sentences:
-	find texts/ -name '*.??.sentences' -delete
+	find texts/ -name '*/??.sentences' -delete
 
 huninput: $(shell ./get_make_targets.py 1 .huninput)
 %/pl.huninput: %/pl.txt toolkit/sentence_splitter.py toolkit/text_export.py
@@ -28,7 +28,7 @@ huninput: $(shell ./get_make_targets.py 1 .huninput)
 %/el.huninput: %/el.txt toolkit/sentence_splitter.py toolkit/text_export.py
 	$(H) ./toolkit/text_export.py hunalign $< el > $@
 clean-huninput:
-	find texts/ -name '*.??.huninput' -delete
+	find texts/ -name '*/??.huninput' -delete
 
 hunalign: $(shell ./get_make_targets.py 2 .hunalign)
 # NOTE: when translate.txt is not there, it means a Hunalign error.
@@ -43,18 +43,18 @@ hunalign: $(shell ./get_make_targets.py 2 .hunalign)
 	$(HUNALIGN) /dev/null $^ -realign -utf > $@ 2> >(tee "/tmp/$(shell echo $@.log | sed -e 's#/#_#g')" | grep Quality >&2)
 #	rm translate.txt || rm $@ && cat /tmp/$(shell echo $@.log | sed -e 's#/#_#g') && false
 clean-hunalign:
-	find texts/ -name '*.??-??.hunalign' -delete
+	find texts/ -name '*/??-??.hunalign' -delete
 	rm -f /tmp/*.hunalign.log
 
 pairs: data/pairs.pl-cu data/pairs.cu-el data/pairs.pl-el
 # To require alignments, add $(shell find texts/ -name '*.??-??.hunalign') as requirement
 # I'm using a wildcard here (instead of get_make_targets) because not all alignments are needed
 data/pairs.pl-cu: alignment_analysis.py
-	./alignment_analysis.py `find texts/ -name '*.pl-cu.hunalign'` > $@
+	./alignment_analysis.py `find texts/ -name 'pl-cu.hunalign'` > $@
 data/pairs.cu-el: alignment_analysis.py
-	./alignment_analysis.py `find texts/ -name '*.cu-el.hunalign'` > $@
+	./alignment_analysis.py `find texts/ -name 'cu-el.hunalign'` > $@
 data/pairs.pl-el: alignment_analysis.py
-	./alignment_analysis.py `find texts/ -name '*.pl-el.hunalign'` > $@
+	./alignment_analysis.py `find texts/ -name 'pl-el.hunalign'` > $@
 
 my: $(shell ./get_make_targets.py 2 .my)
 %/pl-cu.my: %/pl.huninput %/cu.huninput
@@ -64,13 +64,13 @@ my: $(shell ./get_make_targets.py 2 .my)
 %/pl-el.my: %/pl.huninput %/el.huninput
 	./toolkit/aligner.py $^ > $@
 clean-my:
-	find texts/ -name '*.??-??.my' -delete
+	find texts/ -name '*/??-??.my' -delete
 
 
 align3: $(shell ./get_make_targets.py 3 .3)
 #TODO
 clean-3:
-	find texts/ -name '*.??-??-??.3' -delete; \
+	find texts/ -name '*/??-??-??.3' -delete; \
 
 test:
 #	$(HUNALIGN) /dev/null test_data/kanon_izr.pl.metaphone test_data/kanon_izr.cu.metaphone -realign > test_data/kanon_izr.pl-cu.hunalign

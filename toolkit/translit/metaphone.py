@@ -22,7 +22,7 @@ WARNINGS_ENABLED = True # changed also by metaphone function
 
 metaphone_charset = "aeiou-#?bcdfhjkl7mnprstvz2"
 
-ignored_chars = ".,:;!?@΄´᾽῞∙··()[]{}<>«»„”\"–*…\xad" # \xad - soft hyphen
+ignored_chars = ".,:;!?@᾿΄´᾽῞∙··()[]{}<>«»‘’“„”\"–*…\xad" # \xad - soft hyphen
 ignored_chars_regex = re.compile("["+re.escape(ignored_chars)+"]", re.UNICODE)
 
 pairs_pl = [
@@ -45,6 +45,7 @@ pairs_pl = [
     ("w",   "v"),
     ("y",   "i"),
     ("é",   "e"), # used in old Polish
+    ("ì",   "i"), # used in old Polish
     ]
 
 pairs_cu = [
@@ -175,6 +176,8 @@ def metaphone_generic(pairs, word, lang='<?>',
     return word[:max_length] # cutting to `max_length` chars
 
 def metaphone_pl(word, **kwargs):
+    word = word.replace('=', '')
+    word = word.replace('_', '')
     return metaphone_generic(pairs_pl, word, 'pl', **kwargs)
 
 def metaphone_cu(word, **kwargs):
@@ -185,6 +188,8 @@ def metaphone_cu(word, **kwargs):
     return metaphone_generic(pairs_cu, word, 'cu', **kwargs)
 
 def metaphone_el(word, **kwargs):
+    word = word.replace('=', '')
+    word = word.replace('_', '')
     word = simplify_el(word)
     m = re.match('[^\w]*([0-9]+)[^\w]*', word)
     if m:
@@ -238,8 +243,11 @@ def detect_language(text):
         except ValueError:
             pass
     for c in text:
-        if unicodedata.name(c).split()[0] == 'LATIN':
-            return 'pl'
+        try:
+            if unicodedata.name(c).split()[0] == 'LATIN':
+                return 'pl'
+        except ValueError, e:
+            print >> sys.stderr, "metaphone: ERROR! %s, c=%s" % (e, repr(c))
     return None
 
 
