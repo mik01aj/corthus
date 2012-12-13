@@ -20,3 +20,4 @@ translate.txt
 *.lof
 *.lot
 external/
+.idea/
