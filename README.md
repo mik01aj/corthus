@@ -8,4 +8,9 @@ And then, hopefully, this page will also contain some reasonable
 description of the project. For now, the best you can get is
 the master thesis (only in Polish).
 
+Here are some screenshots:
+
+![screenshot](//raw.github.com/mik01aj/corthus/master/magisterka/web2.png)
+![screenshot](//raw.github.com/mik01aj/corthus/master/magisterka/websearch.png)
+
 See you soon!
