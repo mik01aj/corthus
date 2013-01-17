@@ -9,7 +9,6 @@ texts/*.sentences
 texts/*/*.sentences
 texts/*/*/*.sentences
 *.log
-*.png
 installation_notes
 index/
 translate.txt
