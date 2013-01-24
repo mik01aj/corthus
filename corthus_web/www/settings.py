@@ -4,10 +4,12 @@
 
 import sys
 import os
-PROJECT_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+assert os.path.isdir(PROJECT_ROOT), PROJECT_ROOT
 sys.path.append(os.path.dirname(PROJECT_ROOT))
 
 TEXTS_ROOT = os.path.join(os.path.dirname(PROJECT_ROOT), 'texts')
+assert os.path.isdir(TEXTS_ROOT), TEXTS_ROOT
 
 # ---------------------------------------------------------------------
 

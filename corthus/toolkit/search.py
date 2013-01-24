@@ -15,15 +15,19 @@ from __future__ import unicode_literals
 import sys
 import os.path
 
-
-PATH_ROOT = os.path.dirname(os.path.dirname(__file__))
-assert os.path.isdir(PATH_ROOT + "/texts")
-assert os.path.isdir(PATH_ROOT + "/external")
+#import pdb; pdb.set_trace()
+PATH_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
+assert os.path.isdir(PATH_ROOT), PATH_ROOT
 
 TEXTS_ROOT = PATH_ROOT + '/texts'
+assert os.path.isdir(TEXTS_ROOT), TEXTS_ROOT
 
-INDEX_DIR = PATH_ROOT + '/index'
-sys.path.append(PATH_ROOT + '/external') # for Whoosh
+INDEX_DIR = PATH_ROOT + '/corthus/index'
+assert os.path.isdir(INDEX_DIR), INDEX_DIR
+
+EXTERNAL_DIR = PATH_ROOT + '/corthus/external' # for Whoosh
+assert os.path.isdir(EXTERNAL_DIR), EXTERNAL_DIR
+sys.path.append(EXTERNAL_DIR)
 
 from Text import Text
 from translit import metaphone_text
