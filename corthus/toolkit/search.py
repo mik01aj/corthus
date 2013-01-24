@@ -15,7 +15,7 @@ from __future__ import unicode_literals
 import sys
 import os.path
 
-#import pdb; pdb.set_trace()
+# TODO get rid of this path madness (this is relative to site-packages)
 PATH_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
 assert os.path.isdir(PATH_ROOT), PATH_ROOT
 
