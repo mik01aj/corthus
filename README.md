@@ -13,6 +13,18 @@ Here are some screenshots:
 ![screenshot](//raw.github.com/mik01aj/corthus/master/magisterka/web2.png)
 ![screenshot](//raw.github.com/mik01aj/corthus/master/magisterka/websearch.png)
 
+To make the current version work you need to do:
+
+    virtualenv .
+    . bin/activate
+    easy_install django
+    ln -s ../../../corthus/toolkit lib/python2.7/site-packages/toolkit
+
+And then you can start the server:
+
+    cd corthus_web/
+    ./manage.py runserver
+
 See you soon!
 
 [1]: https://github.com/mik01aj/corthus/blob/master/magisterka/magisterka.pdf?raw=true
