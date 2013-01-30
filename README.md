@@ -10,8 +10,8 @@ the [master thesis][1] (only in Polish).
 
 Here are some screenshots:
 
-![screenshot](//raw.github.com/mik01aj/corthus/master/magisterka/web2.png)
-![screenshot](//raw.github.com/mik01aj/corthus/master/magisterka/websearch.png)
+![screenshot](//raw.github.com/mik01aj/corthus/master/doc/web2.png)
+![screenshot](//raw.github.com/mik01aj/corthus/master/doc/websearch.png)
 
 To make the current version work you need to do:
 
@@ -27,4 +27,4 @@ And then you can start the server:
 
 See you soon!
 
-[1]: https://github.com/mik01aj/corthus/blob/master/magisterka/magisterka.pdf?raw=true
+[1]: https://github.com/mik01aj/corthus/blob/master/doc/magisterka.pdf?raw=true
