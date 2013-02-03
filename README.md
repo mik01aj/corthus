@@ -10,8 +10,8 @@ the [master thesis][1] (only in Polish).
 
 Here are some screenshots:
 
-![screenshot](//raw.github.com/mik01aj/corthus/master/doc/web2.png)
-![screenshot](//raw.github.com/mik01aj/corthus/master/doc/websearch.png)
+![screenshot](://raw.github.com/mik01aj/corthus/master/doc/web2.png)
+![screenshot](://raw.github.com/mik01aj/corthus/master/doc/websearch.png)
 
 To make the current version work you need to do:
 
