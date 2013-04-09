@@ -1,9 +1,11 @@
-bin/
-include/
-lib/
-local/
 *.pyc
 .#*
+*.log
+
+# search index
+index/
+
+# alignment files
 *.hunalign
 *.huninput
 texts/*.my
@@ -12,15 +14,14 @@ texts/*/*/*.my
 texts/*.sentences
 texts/*/*.sentences
 texts/*/*/*.sentences
-*.log
-installation_notes
-index/
 translate.txt
-*.aux
-*.bbl
-*.toc
-*.blg
-*.lof
-*.lot
-external/
+
+# PyCharm config
 .idea/
+
+# virtualenv folders
+bin/
+include/
+lib/
+local/
+

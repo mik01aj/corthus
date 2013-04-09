@@ -1,10 +1,12 @@
-# Django settings for www project.
+"""
+Django settings
+"""
 
 # by m01 --------------------------------------------------------------
 
 import sys
 import os
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 assert os.path.isdir(PROJECT_ROOT), PROJECT_ROOT
 sys.path.append(os.path.dirname(PROJECT_ROOT))
 
@@ -114,10 +116,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'www.urls'
+ROOT_URLCONF = 'urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'www.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 TEMPLATE_DIRS = (

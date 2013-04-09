@@ -7,9 +7,6 @@ from settings import PROJECT_ROOT
 
 urlpatterns = patterns(
     '',
-    # Examples:
-    # url(r'^$', 'www.views.home', name='home'),
-    # url(r'^www/', include('www.foo.urls')),
 
 #    (r'^folder/([a-z0-9_/-]+)', 'core.views.folder'),
 #    (r'^chapter/([0-9]+)', 'corpus.views.chapter'),
@@ -22,7 +19,7 @@ urlpatterns = patterns(
     (r'^texts/([A-Za-z0-9_/,-]+)\.([a-z-]{2,20})/correct$',
      'core.views.correct'),
 
-    (r'^texts(/[A-Za-z0-9_/,-]*)$', # important: no dots! (../)
+    (r'^texts(/[A-Za-z0-9_/,-]*)$', # important: no dots allowed! (to prevent ../)
      'core.views.folder'),
 
     (r'^search',
