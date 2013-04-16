@@ -194,8 +194,7 @@ def expand_cu(string, numbers=True):
 numbers_1 = ('а', 'в', 'г', 'д', '_е', 's', 'з', 'и', 'f')
 numbers_10 = ('_i', 'к', 'л', 'м', 'н', '_кс', '_о', 'п', 'ч')
 numbers_100 = ('р', 'с', 'т', 'ф', 'х', '_у', '_пс', 'w\т', 'ц')
-# regex syntax: (?=...) look ahead, (?<=...) look behind
-#                                (_________this_is_what_we_really_match________)
+#               look behind      (_________this_is_what_we_really_match________)           look ahead
 number_regex = '(?<=[-\s\.<\(\[])((#$A)?($C~$B?|$C?~?$B~)$A?|$C?~?$B?~?$A~(_i)?)(?=[-\s\.,:$%\)\]}>])'
 to_re = lambda l: '(%s)' % '|'.join(map(re.escape, l))
 number_regex = number_regex.replace('$A', to_re(numbers_1))
