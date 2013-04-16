@@ -11,9 +11,12 @@ from cu2pl import cu2pl
 #from cu2en import cu2en
 from el2pl import el2pl
 
+from hip2unicode import hip2unicode
+
 from simplify_el import simplify_el
 
 from metaphone import metaphone, metaphone_text, detect_language
+
 
 def translit_pl(text, lang):
     assert lang in ('pl', 'cu', 'el')
