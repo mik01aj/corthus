@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from expand_cu import multi_replace
+
 # This table comes from a script from the Ponomar Project (http://www.ponomar.net/cu_support.html),
 # lincensed under the GNU General Public License.
 # Source: http://www.ponomar.net/cgi-bin/fetch_script.cgi?target=hip
