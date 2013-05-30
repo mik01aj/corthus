@@ -2,7 +2,7 @@ import unittest
 from Document import Document
 
 
-class TestDocument(unittest.TestCase):
+class DocumentTest(unittest.TestCase):
     def setUp(self):
         self.d = Document()
 
@@ -37,6 +37,9 @@ class TestDocument(unittest.TestCase):
         self.assertRaises(IndexError, self.d.__getitem__, -1)
         self.assertRaises(IndexError, self.d.__getitem__, 1000)
 
+    def test_remove(self):
+        self.d.add_row({'a': 'aaa'})
+        self.d[0].remove()
 
 if __name__ == '__main__':
     unittest.main()
