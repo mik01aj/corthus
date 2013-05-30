@@ -54,10 +54,11 @@ class NewAlignment(object):
             self.append(row)
 
     @classmethod
-    def from_folder(cls, path):
+    def from_folder(cls, path, langs=None):
         from TextFolder import TextFolder
         pt = TextFolder(path)
-        langs = ['pl', 'cu', 'el']
+        if not langs:
+            langs = ['pl', 'cu', 'el']
         oa = pt.get_alignment(langs, 'my')
         seqs = [pt.get_sentences(lang) for lang in langs]
         return NewAlignment.from_old_alignment(oa, langs, seqs)
@@ -221,37 +222,31 @@ class NewAlignment(object):
             print
 
 
-#    def __str__(self):
-#        return '<NewAlignment>'
-
-
 if __name__ == '__main__':
     import sys
+    import argparse
 
-    try:
-        [arg] = sys.argv[1:]
-    except ValueError:
-        print 'USAGE: ./NewAlignment.py <text-folder>'
-        print '       ./NewAlignment.py export'
-        print '       ./NewAlignment.py giza'
-        raise SystemExit
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('action', choices=['sentences', 'giza', 'dump', 'print', 'json'])
+    parser.add_argument('--folder', help='')
+    parser.add_argument('langs', help='langs (for all actions except giza)', type=lambda s: s.split(','))
+    options = parser.parse_args()
 
-    if arg == 'export':
+    if options.action == 'sentences':
         fn = 'texts/kanon_izr/everything'
         out = '/tmp/'
-        langs = ['pl', 'cu']
         print 'exporting %s to %s' % (fn, out)
         with open(fn) as f:
             a = NewAlignment.read(f)
-        (oa, ts) = a.to_old_alignment(*langs)
-        oa.dump(out + '%s.new' % ('-'.join(langs)))
-        for lang, t in zip(langs, ts):
+        (oa, ts) = a.to_old_alignment(*options.langs)
+        oa.dump(out + '%s.new' % ('-'.join(options.langs)))
+        for lang, t in zip(options.langs, ts):
             with open('/tmp/%s.sentences' % lang, 'w') as f:
                 for s in t:
                     print >> f, s.encode('utf-8')
         print 'done.'
 
-    elif arg == 'giza':
+    elif options.action == 'giza':
         with open('texts/kanon_izr/everything') as f:
             a = NewAlignment.read(f)
         with open('texts/evangelie/matfea/everything') as f:
@@ -265,6 +260,13 @@ if __name__ == '__main__':
                 a2.export_sentences_for_giza('cu', 'el', f1, f2,
                                              use_metaphone=True)
     else:
-        a = NewAlignment.from_folder(arg) # e.g. texts/kanon_izr
-        #a.dump()
-        a.pprint_text('pl')
+        a = NewAlignment.from_folder(options.folder, options.langs) # e.g. texts/kanon_izr
+
+        if options.action == 'dump':
+            a.dump()
+        elif options.action == 'print':
+            a.pprint_text('pl')
+        elif options.action == 'json':
+            import json
+            obj = {'rungs': a.rows, 'langs': options.langs}
+            print json.dumps(obj, ensure_ascii=False, sort_keys=True, indent=2).encode('utf-8')
